@@ -318,7 +318,16 @@ body {
 }
 .badge-overdue { background: var(--red-dim); color: var(--red); }
 .badge-open { background: var(--amber-glow); color: var(--amber); }
+.badge-pending { background: #fef3c7; color: #d97706; }
 .badge-closed { background: var(--green-dim); color: var(--green); }
+.detail-label { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; }
+.detail-label-sm { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; }
+.detail-value { font-size: 14px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.detail-grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.section-divider { border-top: 1px solid var(--border); padding-top: 16px; }
+.section-heading { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 10px; }
+.cell-truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge-operational { background: var(--green-dim); color: var(--green); }
 .badge-critical { background: var(--red-dim); color: var(--red); }
 .badge-maintenance { background: var(--blue-dim); color: var(--blue); }
@@ -913,9 +922,10 @@ body {
       </div>
       <div class="page-body">
         <div class="filter-bar" style="margin-bottom:16px">
-          <div class="filter-chip active" onclick="filterWO('all', this)">All</div>
+          <div class="filter-chip active" onclick="filterWO('Active', this)">Active</div>
           <div class="filter-chip" onclick="filterWO('Open', this)">Open</div>
-          <div class="filter-chip" onclick="filterWO('Closed', this)">Closed</div>
+          <div class="filter-chip" onclick="filterWO('Pending', this)">⏳ Pending</div>
+          <div class="filter-chip" onclick="filterWO('Closed', this)">✓ Completed</div>
           <div class="filter-chip" onclick="filterWO('PM', this)">🔄 PM</div>
           <div class="filter-chip" onclick="filterWO('Reported', this)">🚨 Reported</div>
           <div class="search-bar" style="width:240px;margin-left:auto">
@@ -1037,7 +1047,7 @@ body {
               <button class="btn btn-secondary" onclick="exportData()">⬇ Export Local Data (JSON)</button>
               <button class="btn btn-danger" onclick="resetDemoData()">🗑 Reset Demo Data to Defaults</button>
             </div>
-            <p style="margin-top:10px;font-size:12px;color:var(--text-muted)">In demo mode, all data persists in your browser's local storage. Reset clears everything and reloads the original 19 machines from the Excel model.</p>
+            <p style="margin-top:10px;font-size:12px;color:var(--text-muted)">In demo mode, all data persists in your browser's local storage. Reset clears everything and reloads the original 192 machines from the asset registry.</p>
           </div>
         </div>
       </div>
@@ -1196,7 +1206,7 @@ body {
           <div class="form-group">
             <label>Status</label>
             <select id="resolveStatus">
-              <option>Open</option><option>Closed</option>
+              <option>Open</option><option>Pending</option><option>Closed</option>
             </select>
           </div>
           <div class="form-group full">
@@ -1294,7 +1304,7 @@ const LocalStore = {
     if (CONFIG.useAirtable) return; // don't cache when Airtable is source of truth
     try {
       localStorage.setItem(this._key, JSON.stringify({
-        machines, workOrders, operators, savedAt: new Date().toISOString()
+        machines, workOrders, operators, machineCount: INLINE_MACHINE_COUNT, savedAt: new Date().toISOString()
       }));
     } catch(e) { toast('Local storage full — export your data before it is lost!', 'error'); }
   },
@@ -1543,6 +1553,7 @@ let workOrders = [
 
 // Dynamically derived from machine data
 const LOCATIONS = [...new Set(machines.map(m => m.location).filter(Boolean))].sort();
+const INLINE_MACHINE_COUNT = machines.length;
 
 // ===================================================================
 // AIRTABLE API LAYER
@@ -1733,6 +1744,18 @@ const DataService = {
 // ===================================================================
 
 // FIX: XSS sanitizer — all user content must pass through this before innerHTML
+// Helper: push fields to Airtable with guard + error toast
+async function syncAirtable(table, recordId, fields, errMsg) {
+  if (!CONFIG.useAirtable || !recordId) return;
+  try { await AirtableAPI.updateRecord(table, recordId, fields); }
+  catch(e) { toast((errMsg || 'Airtable sync failed') + ': ' + e.message, 'error'); }
+}
+
+// Helper: render a detail label+value pair
+function detailCell(label, value, extraClass) {
+  return `<div><span class="detail-label">${label}</span><br><span class="detail-value${extraClass?' '+extraClass:''}">${value}</span></div>`;
+}
+
 function esc(str) {
   if (str === null || str === undefined) return '';
   const d = document.createElement('div');
@@ -1899,14 +1922,15 @@ async function refreshDashboard() {
 
   const overdue = machines.filter(m => daysUntilService(m) < 0);
   const openWO = workOrders.filter(w => w.status === 'Open');
+  const pendingWO = workOrders.filter(w => w.status === 'Pending');
   const closedWO = workOrders.filter(w => w.status === 'Closed');
 
-  document.getElementById('openWoBadge').textContent = openWO.length;
+  document.getElementById('openWoBadge').textContent = openWO.length + pendingWO.length;
 
   document.getElementById('kpiGrid').innerHTML = `
     <div class="kpi-card overdue"><div class="kpi-accent"></div><div class="kpi-icon">⚠️</div><div class="kpi-value">${overdue.length}</div><div class="kpi-label">Overdue Services</div></div>
     <div class="kpi-card open"><div class="kpi-accent"></div><div class="kpi-icon">🔧</div><div class="kpi-value">${openWO.length}</div><div class="kpi-label">Open Work Orders</div></div>
-    <div class="kpi-card total"><div class="kpi-accent"></div><div class="kpi-icon">🏭</div><div class="kpi-value">${machines.length}</div><div class="kpi-label">Total Machines</div></div>
+    <div class="kpi-card" style="--accent:var(--amber)"><div class="kpi-accent"></div><div class="kpi-icon">⏳</div><div class="kpi-value">${pendingWO.length}</div><div class="kpi-label">Pending Follow-up</div></div>
     <div class="kpi-card completed"><div class="kpi-accent"></div><div class="kpi-icon">✅</div><div class="kpi-value">${closedWO.length}</div><div class="kpi-label">Completed WOs</div></div>
   `;
 
@@ -1916,7 +1940,7 @@ async function refreshDashboard() {
   const tbody = document.querySelector('#overdueTable tbody');
   tbody.innerHTML = sorted.slice(0,10).map(m => {
     const days = Math.abs(daysUntilService(m));
-    const pmWO = workOrders.find(w => w.machineId === m.id && w.status === 'Open' && w._isPM);
+    const pmWO = workOrders.find(w => w.machineId === m.id && (w.status === 'Open' || w.status === 'Pending') && w._isPM);
     const clickAction = pmWO
       ? `onclick="openResolveWO('${pmWO.id}')" title="Click to assign tech & resolve"`
       : `onclick="openMachineDetail('${esc(m.id)}')"`;
@@ -1944,16 +1968,26 @@ async function refreshDashboard() {
       <div class="bar-count">${v}</div>
     </div>`).join('');
 
-  // Recent Activity
-  const recent = [...workOrders].sort((a,b) => new Date(b.reportedDate)-new Date(a.reportedDate)).slice(0,6);
+  // Recent Activity — sort by most recent action date
+  const recent = [...workOrders].sort((a,b) => {
+    const dateA = a.workCompleted || a.workStarted || a.reportedDate;
+    const dateB = b.workCompleted || b.workStarted || b.reportedDate;
+    return new Date(dateB) - new Date(dateA);
+  }).slice(0,8);
   document.getElementById('recentActivity').innerHTML = recent.map(w => {
-    const dotColor = w.status==='Open' ? 'var(--amber)' : 'var(--green)';
-    const click = w.status==='Open' ? `onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"` : '';
+    const dotColor = w.status==='Closed' ? 'var(--green)' : w.status==='Pending' ? 'var(--amber)' : 'var(--red)';
+    const click = w.status!=='Closed' ? `onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"` : '';
+    const statusTag = w.status==='Closed'
+      ? '<span style="color:var(--green);font-size:11px;font-weight:600">✓ Completed</span>'
+      : w.status==='Pending'
+      ? '<span style="color:var(--amber);font-size:11px;font-weight:600">⏳ Pending follow-up</span>'
+      : '<span style="color:var(--red);font-size:11px;font-weight:600">↗ Open</span>';
+    const actDate = w.workCompleted || w.reportedDate;
     return `<div class="activity-item" ${click}>
       <div class="activity-dot" style="background:${dotColor}"></div>
       <div>
-        <div class="activity-text"><strong>${esc(w.machineId)}</strong> — ${esc(w.notes.substring(0,60))}${w.notes.length>60?'...':''} ${w.status==='Open'?'<span style="color:var(--amber);font-size:11px">↗ OPEN</span>':''}</div>
-        <div class="activity-time">${formatDate(w.reportedDate)} · ${w.assignedTech || 'Unassigned'}</div>
+        <div class="activity-text"><strong>${esc(w.machineId)}</strong> — ${esc(w.notes.substring(0,55))}${w.notes.length>55?'…':''} ${statusTag}</div>
+        <div class="activity-time">${formatDate(actDate)} · ${w.assignedTech || 'Unassigned'}</div>
       </div>
     </div>`;
   }).join('');
@@ -2050,32 +2084,33 @@ function openMachineDetail(id) {
   const dts = daysUntilService(m);
   const isOverdue = dts < 0;
   const mWOs = workOrders.filter(w => w.machineId === id).sort((a,b) => new Date(b.reportedDate)-new Date(a.reportedDate));
+  const woBadge = s => s==='Open'?'badge-open':s==='Pending'?'badge-pending':'badge-closed';
 
   document.getElementById('machineModalTitle').innerHTML = `<span style="color:var(--amber)">${esc(m.id)}</span> — ${esc(m.name)}`;
   document.getElementById('machineModalBody').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Type</span><br><span style="font-size:14px">${esc(m.type)}</span></div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Location</span><br><span style="font-size:14px">${esc(m.location)}</span></div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Manufacturer</span><br><span style="font-size:14px">${esc(m.manufacturer)}</span></div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Model</span><br><span style="font-size:14px">${esc(m.model)}</span></div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Service Freq</span><br><span style="font-size:14px">${m.serviceFreqDays} days</span></div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Last Service</span><br><span style="font-size:14px">${formatDate(m.lastService)}</span></div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Next Service</span><br><span style="font-size:14px;${isOverdue?'color:var(--red)':''}">${nextServiceDate(m)} ${isOverdue?'('+Math.abs(dts)+'d OVERDUE)':''}</span>
+    <div class="detail-grid">
+      ${detailCell('Type', esc(m.type))}
+      ${detailCell('Location', esc(m.location))}
+      ${detailCell('Manufacturer', esc(m.manufacturer))}
+      ${detailCell('Model', esc(m.model))}
+      ${detailCell('Service Freq', m.serviceFreqDays + ' days')}
+      ${detailCell('Last Service', formatDate(m.lastService))}
+      <div><span class="detail-label">Next Service</span><br><span class="detail-value${isOverdue?' style="color:var(--red)"':''}">${nextServiceDate(m)} ${isOverdue?'('+Math.abs(dts)+'d OVERDUE)':''}</span>
       ${m.nextServiceOverride ? `<br><span style="font-size:11px;color:var(--amber)">📅 Follow-up override: ${formatDate(m.nextServiceOverride)}</span>` : ''}
       ${m._followUpNotes ? `<br><span style="font-size:11px;color:var(--text-muted)">📌 ${m._followUpNotes}</span>` : ''}
       </div>
-      <div><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Status</span><br><span style="font-size:14px">${esc(m.status)}</span></div>
+      ${detailCell('Status', esc(m.status))}
     </div>
     ${m.manualLink && /^https?:\/\//i.test(m.manualLink) ? `<a href="${esc(m.manualLink)}" target="_blank" rel="noopener" style="color:var(--amber);font-size:13px">📄 Manufacturer Manual →</a><br><br>` : ''}
-    <div style="border-top:1px solid var(--border);padding-top:16px">
-      <h4 style="font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:10px">Service History (${mWOs.length} records)</h4>
+    <div class="section-divider">
+      <h4 class="section-heading">Service History (${mWOs.length} records)</h4>
       ${mWOs.length ? `<table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Tech</th><th>Status</th><th>Notes</th></tr></thead><tbody>
-        ${mWOs.slice(0,10).map(w => `<tr ${w.status==='Open'?`onclick="closeModal('machineModal');openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
+        ${mWOs.slice(0,10).map(w => `<tr ${w.status!=='Closed'?`onclick="closeModal('machineModal');openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
           <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td>
           <td>${esc(w.incidentType)}</td>
           <td>${w.assignedTech || '<span style="color:var(--text-muted);font-style:italic">—</span>'}</td>
-          <td><span class="badge-status ${w.status==='Open'?'badge-open':'badge-closed'}">${esc(w.status)}${w.status==='Open'?' ↗':''}</span></td>
-          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.notes)}</td>
+          <td><span class="badge-status ${woBadge(w.status)}">${esc(w.status)}${w.status==='Open'?' ↗':''}</span></td>
+          <td class="cell-truncate">${esc(w.notes)}</td>
         </tr>`).join('')}
       </tbody></table>` : '<p style="color:var(--text-muted);font-size:13px">No service history recorded.</p>'}
     </div>
@@ -2089,12 +2124,14 @@ function openMachineDetail(id) {
 // ===================================================================
 // WORK ORDERS
 // ===================================================================
-let woFilterStatus = 'all';
+let woFilterStatus = 'Active';
 
 function renderWorkOrders() {
   const search = (document.getElementById('woSearch').value||'').toLowerCase();
   let filtered = workOrders.filter(w => {
+    if (woFilterStatus === 'Active' && w.status !== 'Open' && w.status !== 'Pending') return false;
     if (woFilterStatus === 'Open' && w.status !== 'Open') return false;
+    if (woFilterStatus === 'Pending' && w.status !== 'Pending') return false;
     if (woFilterStatus === 'Closed' && w.status !== 'Closed') return false;
     if (woFilterStatus === 'PM' && !w._isPM) return false;
     if (woFilterStatus === 'Reported' && w._isPM) return false;
@@ -2117,7 +2154,7 @@ function renderWorkOrders() {
       <td>${esc(w.category)}</td>
       <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td>
       <td>${w.assignedTech || '<span style="color:var(--text-muted);font-style:italic">Unassigned</span>'}</td>
-      <td><span class="badge-status ${w.status==='Open'?'badge-open':'badge-closed'}">${esc(w.status)}</span></td>
+      <td><span class="badge-status ${w.status==='Open'?'badge-open':w.status==='Pending'?'badge-pending':'badge-closed'}">${esc(w.status)}</span></td>
       <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.notes)}</td>
     </tr>`;
   }).join('');
@@ -2180,26 +2217,26 @@ function openResolveWO(woId) {
     ${isPM ? '<div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">🔄</span><span style="font-size:13px;color:var(--blue);font-weight:600">Auto-Generated PM Work Order</span><span style="font-size:12px;color:var(--text-muted);margin-left:auto">Assign a tech to get this done</span></div>' : ''}
     <div style="background:var(--bg-tertiary);border-radius:var(--radius);padding:14px 16px;margin-bottom:4px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Machine</span><br>
+        <div><span class="detail-label-sm">Machine</span><br>
           <span style="font-family:var(--font-mono);color:var(--amber);font-weight:600">${esc(w.machineId)}</span> — ${esc(w.machineName)}</div>
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Location</span><br>${m ? m.location : '—'}</div>
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">${isPM ? 'Generated' : 'Reported By'}</span><br>${esc(w.reportedBy)}</div>
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Date</span><br>${formatDate(w.reportedDate)}</div>
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Type</span><br>${esc(w.incidentType)}</div>
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Category</span><br>${esc(w.category)}</div>
+        <div><span class="detail-label-sm">Location</span><br>${m ? m.location : '—'}</div>
+        <div><span class="detail-label-sm">${isPM ? 'Generated' : 'Reported By'}</span><br>${esc(w.reportedBy)}</div>
+        <div><span class="detail-label-sm">Date</span><br>${formatDate(w.reportedDate)}</div>
+        <div><span class="detail-label-sm">Type</span><br>${esc(w.incidentType)}</div>
+        <div><span class="detail-label-sm">Category</span><br>${esc(w.category)}</div>
         ${w.workStarted || w.workCompleted ? `
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Work Started</span><br>${w.workStarted ? formatDate(w.workStarted) : '<span style="color:var(--text-muted)">—</span>'}</div>
-        <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">${w.workCompleted ? 'Completed' : 'Turnaround'}</span><br>${w.workCompleted ? formatDate(w.workCompleted) + (w.workStarted ? ' <span style="font-size:11px;color:var(--green);font-family:var(--font-mono)">(' + Math.max(1, Math.round((new Date(w.workCompleted) - new Date(w.workStarted)) / 86400000)) + 'd)</span>' : '') : (w.workStarted ? '<span style="font-family:var(--font-mono);color:var(--amber)">' + Math.max(1, Math.round((new Date() - new Date(w.workStarted)) / 86400000)) + 'd in progress</span>' : '—')}</div>
+        <div><span class="detail-label-sm">Work Started</span><br>${w.workStarted ? formatDate(w.workStarted) : '<span style="color:var(--text-muted)">—</span>'}</div>
+        <div><span class="detail-label-sm">${w.workCompleted ? 'Completed' : 'Turnaround'}</span><br>${w.workCompleted ? formatDate(w.workCompleted) + (w.workStarted ? ' <span style="font-size:11px;color:var(--green);font-family:var(--font-mono)">(' + Math.max(1, Math.round((new Date(w.workCompleted) - new Date(w.workStarted)) / 86400000)) + 'd)</span>' : '') : (w.workStarted ? '<span style="font-family:var(--font-mono);color:var(--amber)">' + Math.max(1, Math.round((new Date() - new Date(w.workStarted)) / 86400000)) + 'd in progress</span>' : '—')}</div>
         ` : ''}
       </div>
-      <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">${descLabel}</span>
+      <div><span class="detail-label-sm">${descLabel}</span>
         <p style="margin-top:4px;font-size:13.5px;color:var(--text-primary);line-height:1.5;background:var(--bg-card);padding:10px 12px;border-radius:var(--radius);border-left:3px solid ${descBorderColor}">${esc(w.notes) || '<span style="color:var(--text-muted);font-style:italic">No description provided</span>'}</p>
       </div>
-      ${w.resolutionNotes ? `<div style="margin-top:10px"><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Resolution Notes</span>
+      ${w.resolutionNotes ? `<div style="margin-top:10px"><span class="detail-label-sm">Resolution Notes</span>
         <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);line-height:1.4;background:var(--bg-card);padding:10px 12px;border-radius:var(--radius);border-left:3px solid var(--green)">${esc(w.resolutionNotes)}</p>
       </div>` : ''}
       <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <span class="badge-status ${w.status==='Open'?'badge-open':'badge-closed'}">${esc(w.status)}</span>
+        <span class="badge-status ${w.status==='Open'?'badge-open':w.status==='Pending'?'badge-pending':'badge-closed'}">${esc(w.status)}</span>
         ${w.assignedTech ? `<span style="font-size:12px;color:var(--text-secondary)">Assigned: <strong>${esc(w.assignedTech)}</strong></span>` : '<span style="font-size:12px;color:var(--text-muted);font-style:italic">⚠ No tech assigned yet</span>'}
         ${isOverdue ? `<span class="badge-status badge-overdue">Machine ${Math.abs(dts)}d OVERDUE</span>` : ''}
         ${w.followUp==='Yes' && w.followUpDate ? `<span style="font-size:12px;color:var(--amber);font-family:var(--font-mono)">📅 Follow-up: ${formatDate(w.followUpDate)}</span>` : ''}
@@ -2238,14 +2275,18 @@ async function resolveWorkOrder() {
   const w = workOrders.find(x => x.id === currentResolveWOId);
   if (!w) return;
 
-  const newStatus = document.getElementById('resolveStatus').value;
+  let newStatus = document.getElementById('resolveStatus').value;
   const assignedTech = document.getElementById('resolveAssignTech').value;
   const resNotes = document.getElementById('resolveNotes').value.trim();
   const followUp = document.getElementById('resolveFollowUp').value;
   const followUpDate = document.getElementById('resolveFollowUpDate').value;
   const followUpNotes = document.getElementById('resolveFollowUpNotes').value.trim();
 
-  // Update the work order in local state
+  // Force Pending when follow-up is scheduled
+  if (followUp === 'Yes' && followUpDate) {
+    newStatus = 'Pending';
+  }
+
   // Track Work_Started: first time a tech is assigned = work begins
   if (assignedTech && !w.assignedTech && !w.workStarted) {
     w.workStarted = new Date().toISOString().split('T')[0];
@@ -2265,36 +2306,35 @@ async function resolveWorkOrder() {
 
   const m = machines.find(x => x.id === w.machineId);
 
-  if (followUp === 'Yes' && followUpDate && m) {
+  if (newStatus === 'Pending' && followUp === 'Yes' && followUpDate && m) {
     // Set override on machine — no longer hacks lastService
     m.nextServiceOverride = followUpDate;
     m._followUpNotes = followUpNotes;
-
-    // Persist override to Airtable
-    if (CONFIG.useAirtable && m._airtableId) {
-      try {
-        await AirtableAPI.updateRecord(CONFIG.airtable.tables.machines, m._airtableId, {
-          'Next_Service_Override': followUpDate,
-          'Override_Notes': followUpNotes,
-        });
-      } catch(e) { toast('Machine override NOT saved to Airtable: ' + e.message, 'error'); }
-    }
-  } else if (newStatus === 'Closed' && followUp !== 'Yes') {
+    await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, {
+      'Next_Service_Override': followUpDate,
+      'Override_Notes': followUpNotes,
+    }, 'Machine override NOT saved to Airtable');
+  } else if (newStatus === 'Closed') {
     // Normal close — update last service to today and clear any override
     if (m) {
       m.lastService = new Date().toISOString().split('T')[0];
       m.nextServiceOverride = '';
       m._followUpNotes = '';
 
-      if (CONFIG.useAirtable && m._airtableId) {
-        try {
-          await AirtableAPI.updateRecord(CONFIG.airtable.tables.machines, m._airtableId, {
-            'Last_Service': m.lastService,
-            'Next_Service_Override': null,
-            'Override_Notes': '',
-          });
-        } catch(e) { toast('Machine update NOT saved to Airtable: ' + e.message, 'error'); }
+      // Check if any OTHER active WOs remain for this machine
+      const remainingActive = workOrders.filter(x =>
+        x.machineId === m.id && (x.status === 'Open' || x.status === 'Pending') && x.id !== w.id
+      );
+      if (remainingActive.length === 0) {
+        m.status = 'Operational';
       }
+
+      await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, {
+        'Last_Service': m.lastService,
+        'Next_Service_Override': null,
+        'Override_Notes': '',
+        'Status': m.status,
+      }, 'Machine update NOT saved to Airtable');
     }
   }
 
@@ -2303,7 +2343,7 @@ async function resolveWorkOrder() {
     if (!w.workStarted) w.workStarted = w.workCompleted;
   }
 
-  // Push to Airtable if connected
+  // Push WO update to Airtable
   if (CONFIG.useAirtable && w._airtableId) {
     try {
       const updateFields = {
@@ -2327,17 +2367,17 @@ async function resolveWorkOrder() {
   LocalStore.save();
   renderWorkOrders();
 
-  if (followUp === 'Yes' && followUpDate) {
-    toast(`${esc(w.id)} — follow-up scheduled for ${formatDate(followUpDate)}. Next service date updated.`, 'warning');
+  if (newStatus === 'Pending' && followUp === 'Yes' && followUpDate) {
+    toast(`${esc(w.id)} — follow-up scheduled for ${formatDate(followUpDate)}. Status set to Pending.`, 'warning');
   } else if (newStatus === 'Closed') {
     toast(`${esc(w.id)} resolved and closed${assignedTech ? ' by ' + assignedTech : ''}`);
   } else {
     toast(`${esc(w.id)} updated`);
   }
 
-  // Update badge count
-  const openCount = workOrders.filter(x => x.status === 'Open').length;
-  document.getElementById('openWoBadge').textContent = openCount;
+  // Update badge count (Open + Pending)
+  const activeCount = workOrders.filter(x => x.status === 'Open' || x.status === 'Pending').length;
+  document.getElementById('openWoBadge').textContent = activeCount;
 }
 
 function toggleFollowUpDate() {
@@ -2385,6 +2425,17 @@ async function submitWorkOrder() {
   if (!wo.notes.trim()) { toast('Describe the problem so we can start diagnosing','warning'); return; }
   const ok = await DataService.addWorkOrder(wo);
   if (ok === false) return; // Airtable write failed — don't close modal
+
+  // Update machine status when reporting a Repair or Emergency issue
+  if (wo.incidentType === 'Emergency' || wo.incidentType === 'Repair') {
+    const m = machines.find(x => x.id === wo.machineId);
+    if (m && m.status === 'Operational') {
+      m.status = wo.incidentType === 'Emergency' ? 'Down - Critical' : 'Down - Non-Critical';
+      LocalStore.save();
+      await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, { 'Status': m.status }, 'Machine status NOT updated in Airtable');
+    }
+  }
+
   closeModal('woModal');
   renderWorkOrders();
   toast('Work order submitted: ' + wo.id + ' — management will assign a tech');
@@ -2415,6 +2466,7 @@ function scanMachine() {
   const dts = daysUntilService(m);
   const isOverdue = dts < 0;
   const mWOs = workOrders.filter(w => w.machineId === m.id).sort((a,b) => new Date(b.reportedDate)-new Date(a.reportedDate)).slice(0,5);
+  const woBadge = s => s==='Open'?'badge-open':s==='Pending'?'badge-pending':'badge-closed';
 
   resultDiv.innerHTML = `
     <div class="panel" style="border-left:3px solid var(--amber)">
@@ -2423,20 +2475,20 @@ function scanMachine() {
         ${isOverdue ? '<span class="badge-status badge-overdue">⚠ OVERDUE '+Math.abs(dts)+'d</span>' : '<span class="badge-status badge-operational">'+m.status+'</span>'}
       </div>
       <div class="panel-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
-          <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Type</span><br>${esc(m.type)}</div>
-          <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Location</span><br>${esc(m.location)}</div>
-          <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Mfg</span><br>${esc(m.manufacturer)}</div>
-          <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Service Freq</span><br>${m.serviceFreqDays}d</div>
-          <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Last Service</span><br>${formatDate(m.lastService)}</div>
-          <div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase">Next Service</span><br><span style="${isOverdue?'color:var(--red)':''}">${nextServiceDate(m)}</span></div>
+        <div class="detail-grid-auto">
+          <div><span class="detail-label-sm">Type</span><br>${esc(m.type)}</div>
+          <div><span class="detail-label-sm">Location</span><br>${esc(m.location)}</div>
+          <div><span class="detail-label-sm">Mfg</span><br>${esc(m.manufacturer)}</div>
+          <div><span class="detail-label-sm">Service Freq</span><br>${m.serviceFreqDays}d</div>
+          <div><span class="detail-label-sm">Last Service</span><br>${formatDate(m.lastService)}</div>
+          <div><span class="detail-label-sm">Next Service</span><br><span ${isOverdue?'style="color:var(--red)"':''}>${nextServiceDate(m)}</span></div>
         </div>
-        ${mWOs.length ? `<h4 style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:8px">Recent Service History</h4>
+        ${mWOs.length ? `<h4 class="section-heading" style="font-size:11px;margin-bottom:8px">Recent Service History</h4>
         <table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Tech</th><th>Status</th><th>Notes</th></tr></thead><tbody>
-        ${mWOs.map(w => `<tr ${w.status==='Open'?`onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
+        ${mWOs.map(w => `<tr ${w.status!=='Closed'?`onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
           <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td><td>${esc(w.incidentType)}</td><td>${w.assignedTech || '<span style="color:var(--text-muted)">—</span>'}</td>
-          <td><span class="badge-status ${w.status==='Open'?'badge-open':'badge-closed'}">${esc(w.status)}${w.status==='Open'?' ↗':''}</span></td>
-          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.notes)}</td></tr>`).join('')}
+          <td><span class="badge-status ${woBadge(w.status)}">${esc(w.status)}${w.status==='Open'?' ↗':''}</span></td>
+          <td class="cell-truncate">${esc(w.notes)}</td></tr>`).join('')}
         </tbody></table>` : ''}
         <div style="margin-top:16px;display:flex;gap:10px">
           <button class="btn btn-primary" onclick="prefillWO('${esc(m.id)}')">🚨 Report Issue</button>
@@ -2559,8 +2611,20 @@ function exportData() {
 (async function init() {
   updateConnStatus();
 
-  // FIX: Load persisted data in demo mode (survives page refresh)
+  // Load persisted data in demo mode (survives page refresh)
+  // Detect stale cache: if stored machine count doesn't match inline data, clear it
   if (!CONFIG.useAirtable) {
+    try {
+      const raw = localStorage.getItem('maint_data_v1');
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (!cached.machineCount || cached.machineCount !== INLINE_MACHINE_COUNT) {
+          localStorage.removeItem('maint_data_v1');
+          toast('Asset registry updated — local cache cleared', 'warning');
+        }
+      }
+    } catch(e) { localStorage.removeItem('maint_data_v1'); }
+
     const loaded = LocalStore.load();
     if (loaded) {
       toast('Data restored from local storage', 'success');
