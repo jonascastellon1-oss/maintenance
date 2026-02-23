@@ -16,7 +16,7 @@
   --border-light: #c5cad8;
   --text-primary: #1a1d2e;
   --text-secondary: #5c6178;
-  --text-muted: #8b90a5;
+  --text-muted: #6b7080;
   --amber: #d97706;
   --amber-dim: #92400e;
   --amber-glow: rgba(217, 119, 6, 0.1);
@@ -35,6 +35,80 @@
   --radius-lg: 12px;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── LOGIN SCREEN ─────────────────────────────────────── */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-primary);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-card {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 40px 44px; width: 360px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12); text-align: center;
+}
+.login-logo {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--amber), #b45309);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin: 0 auto 18px;
+}
+.login-card h2 { font-size: 19px; margin-bottom: 4px; }
+.login-card p  { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+.mode-tiles { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 22px; }
+.mode-tile {
+  border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 13px 6px; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.mode-tile:hover  { border-color: var(--amber); background: var(--amber-glow); }
+.mode-tile.selected { border-color: var(--amber); background: var(--amber-glow); }
+.mode-tile .t-icon  { font-size: 20px; margin-bottom: 5px; }
+.mode-tile .t-label { font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+                       text-transform: uppercase; letter-spacing: .5px; }
+.login-pin input {
+  width: 100%; text-align: center; font-size: 24px;
+  font-family: var(--font-mono); letter-spacing: 8px;
+  padding: 10px; margin-bottom: 8px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary);
+}
+#loginErr { color: var(--red); font-size: 12px; min-height: 18px; margin-bottom: 10px; }
+/* ── MODE BADGE ───────────────────────────────────────── */
+.mode-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: .4px; cursor: pointer;
+  margin-top: 6px;
+}
+.mode-badge.admin    { background: var(--amber-glow); color: var(--amber); border: 1px solid rgba(217,119,6,.4); }
+.mode-badge.tech     { background: var(--blue-dim);   color: var(--blue);  border: 1px solid rgba(37,99,235,.3); }
+.mode-badge.operator { background: var(--green-dim);  color: var(--green); border: 1px solid rgba(22,163,74,.3); }
+/* ── MACHINE AUTOCOMPLETE ─────────────────────────────── */
+.machine-id-wrap { position: relative; }
+#woMachineSuggestions {
+  position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 600;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+  max-height: 220px; overflow-y: auto; display: none;
+}
+.ms-item {
+  padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--bg-tertiary);
+  display: flex; gap: 10px; align-items: baseline;
+}
+.ms-item:last-child { border-bottom: none; }
+.ms-item:hover, .ms-item.hi { background: var(--amber-glow); }
+.ms-id   { font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+            color: var(--amber); min-width: 90px; flex-shrink: 0; }
+.ms-name { font-size: 12px; color: var(--text-secondary);
+           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ── LOCKED FIELD ─────────────────────────────────────── */
+.field-locked {
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 10px;
+  font-size: 14px; color: var(--text-secondary); display: flex;
+  align-items: center; gap: 6px;
+}
+.field-locked .lock-icon { font-size: 11px; opacity: .5; }
 body {
   font-family: var(--font-body);
   background: var(--bg-primary);
@@ -486,7 +560,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 18px;
+  padding: 12px 20px;
+  min-height: 48px;
   border: none;
   border-radius: var(--radius);
   font-family: var(--font-body);
@@ -710,9 +785,10 @@ body {
   flex-wrap: wrap;
 }
 .filter-chip {
-  padding: 6px 14px;
+  padding: 10px 16px;
+  min-height: 44px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
@@ -797,6 +873,36 @@ body {
 </head>
 <body>
 
+<!-- ── LOGIN SCREEN ───────────────────────────────────── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">⚙</div>
+    <h2>Maintenance System</h2>
+    <p>Select your role, then enter your access code</p>
+    <div class="mode-tiles">
+      <div class="mode-tile" id="tile-operator" onclick="selectMode('operator')">
+        <div class="t-icon">👷</div>
+        <div class="t-label">Operator</div>
+      </div>
+      <div class="mode-tile" id="tile-tech" onclick="selectMode('tech')">
+        <div class="t-icon">🔧</div>
+        <div class="t-label">Tech</div>
+      </div>
+      <div class="mode-tile" id="tile-admin" onclick="selectMode('admin')">
+        <div class="t-icon">⚡</div>
+        <div class="t-label">Admin</div>
+      </div>
+    </div>
+    <div class="login-pin">
+      <input type="password" id="loginPin" inputmode="numeric" maxlength="8"
+        placeholder="· · · ·" autocomplete="off"
+        onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <div id="loginErr"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Enter</button>
+  </div>
+</div>
+
 <!-- MOBILE HEADER -->
 <div class="mobile-header">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -824,22 +930,25 @@ body {
       </button>
       <button class="nav-btn" onclick="showPage('workorders')">
         <span class="icon">🔧</span> Work Orders
-        <span class="badge" id="openWoBadge">2</span>
+        <span class="badge" id="openWoBadge">0</span>
       </button>
       <button class="nav-btn" onclick="showPage('scan')">
         <span class="icon">📷</span> Scan
       </button>
-      <div class="nav-section-label" style="margin-top:12px">Admin</div>
-      <button class="nav-btn" onclick="showPage('operators')">
+      <div class="nav-section-label admin-only-nav" style="margin-top:12px">Admin</div>
+      <button class="nav-btn admin-only-nav" onclick="showPage('operators')">
         <span class="icon">👤</span> Operators
       </button>
-      <button class="nav-btn" onclick="showPage('settings')">
+      <button class="nav-btn admin-only-nav" onclick="showPage('settings')">
         <span class="icon">⚡</span> Settings
       </button>
     </nav>
-    <div class="sidebar-footer">
-      <span class="status-dot" id="connDot"></span>
-      <span id="connLabel">Demo Mode</span>
+    <div class="sidebar-footer" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div>
+        <span class="status-dot" id="connDot"></span>
+        <span id="connLabel">Demo Mode</span>
+      </div>
+      <div id="modeBadge" onclick="doLogout()" title="Tap to log out"></div>
     </div>
   </aside>
 
@@ -964,7 +1073,9 @@ body {
           <p>Use a barcode scanner or type the Machine ID below</p>
           <div class="scan-input-wrap">
             <input type="text" id="scanInput" placeholder="AFI-221" autofocus
-              onkeydown="if(event.key==='Enter')scanMachine()">
+              autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+              onkeydown="if(event.key==='Enter')scanMachine()"
+              oninput="scheduleScan()">
           </div>
         </div>
         <div class="scan-result" id="scanResult"></div>
@@ -1047,7 +1158,7 @@ body {
               <button class="btn btn-secondary" onclick="exportData()">⬇ Export Local Data (JSON)</button>
               <button class="btn btn-danger" onclick="resetDemoData()">🗑 Reset Demo Data to Defaults</button>
             </div>
-            <p style="margin-top:10px;font-size:12px;color:var(--text-muted)">In demo mode, all data persists in your browser's local storage. Reset clears everything and reloads the original 192 machines from the asset registry.</p>
+            <p style="margin-top:10px;font-size:12px;color:var(--text-muted)">In demo mode, all data persists in your browser's local storage. Reset clears everything and reloads the original 182 machines from the asset registry.</p>
           </div>
         </div>
       </div>
@@ -1058,7 +1169,7 @@ body {
 
 <!-- WORK ORDER MODAL -->
 <div class="modal-overlay" id="woModal">
-  <div class="modal">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3 id="woModalTitle">Report Machine Issue</h3>
       <button class="modal-close" onclick="closeModal('woModal')">✕</button>
@@ -1067,7 +1178,14 @@ body {
       <div class="form-grid">
         <div class="form-group">
           <label>Machine ID</label>
-          <select id="woMachineId" onchange="autoFillMachine()"></select>
+          <div class="machine-id-wrap">
+            <input type="text" id="woMachineId"
+              placeholder="Scan barcode or type ID / name…"
+              autocomplete="off" autocorrect="off"
+              autocapitalize="characters" spellcheck="false"
+              oninput="machineInput()" onkeydown="machineKeydown(event)">
+            <div id="woMachineSuggestions"></div>
+          </div>
         </div>
         <div class="form-group">
           <label>Machine Name</label>
@@ -1095,13 +1213,20 @@ body {
         </div>
         <div class="form-group">
           <label>Reported By</label>
-          <select id="woReportedBy"></select>
+          <input type="text" id="woReportedBy" placeholder="Your name or initials">
         </div>
         <div class="form-group">
           <label>Priority</label>
           <select id="woPriority">
             <option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option>
           </select>
+        </div>
+        <div class="form-group" id="woMachineDownGroup">
+          <label>Machine Status</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface)">
+            <input type="checkbox" id="woMachineDown" onchange="onMachineDownToggle()" style="width:18px;height:18px;accent-color:var(--red);cursor:pointer">
+            <span id="woMachineDownLabel">Machine is <strong>fully down</strong> — not producing</span>
+          </label>
         </div>
         <div class="form-group full">
           <label>Describe the Problem</label>
@@ -1110,15 +1235,15 @@ body {
       </div>
       <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end">
         <button class="btn btn-secondary" onclick="closeModal('woModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="submitWorkOrder()">🚨 Submit Issue Report</button>
+        <button class="btn btn-primary" id="btnSubmitWO" onclick="submitWorkOrder()">🚨 Submit Issue Report</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- MACHINE DETAIL MODAL -->
-<div class="modal-overlay" id="machineModal">
-  <div class="modal">
+<div class="modal-overlay" id="machineModal" onclick="closeModal('machineModal')">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3 id="machineModalTitle">Machine Detail</h3>
       <button class="modal-close" onclick="closeModal('machineModal')">✕</button>
@@ -1128,8 +1253,8 @@ body {
 </div>
 
 <!-- ADD MACHINE MODAL -->
-<div class="modal-overlay" id="addMachineModal">
-  <div class="modal">
+<div class="modal-overlay" id="addMachineModal" onclick="closeModal('addMachineModal')">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3>Add New Machine</h3>
       <button class="modal-close" onclick="closeModal('addMachineModal')">✕</button>
@@ -1160,8 +1285,8 @@ body {
 </div>
 
 <!-- ADD OPERATOR MODAL -->
-<div class="modal-overlay" id="addOperatorModal">
-  <div class="modal" style="max-width:460px">
+<div class="modal-overlay" id="addOperatorModal" onclick="closeModal('addOperatorModal')">
+  <div class="modal" style="max-width:460px" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3>Add Operator</h3>
       <button class="modal-close" onclick="closeModal('addOperatorModal')">✕</button>
@@ -1181,7 +1306,7 @@ body {
 
 <!-- RESOLVE WORK ORDER MODAL -->
 <div class="modal-overlay" id="resolveWoModal">
-  <div class="modal" style="max-width:640px">
+  <div class="modal" style="max-width:640px" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3 id="resolveWoTitle">Work Order Detail</h3>
       <button class="modal-close" onclick="closeModal('resolveWoModal')">✕</button>
@@ -1195,7 +1320,13 @@ body {
         <div class="form-grid">
           <div class="form-group">
             <label>Assign Tech</label>
-            <select id="resolveAssignTech"></select>
+            <div class="machine-id-wrap">
+              <input type="text" id="resolveAssignTech"
+                placeholder="Type name or scan tech ID…"
+                autocomplete="off" spellcheck="false"
+                oninput="techInput()" onkeydown="techKeydown(event)">
+              <div id="techSuggestions"></div>
+            </div>
           </div>
           <div class="form-group">
             <label>Priority</label>
@@ -1216,10 +1347,6 @@ body {
           <div class="form-group">
             <label>Parts Used</label>
             <input type="text" id="resolvePartsUsed" placeholder="P/N, description...">
-          </div>
-          <div class="form-group">
-            <label>Parts Cost ($)</label>
-            <input type="number" id="resolvePartsCost" min="0" step="0.01" placeholder="0.00">
           </div>
           <div class="form-group">
             <label>Work Started</label>
@@ -1245,12 +1372,12 @@ body {
             <div class="form-group">
               <label>Quick Select</label>
               <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:2px">
-                <button type="button" class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="setFollowUpDays(7)">1 Wk</button>
-                <button type="button" class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="setFollowUpDays(14)">2 Wks</button>
-                <button type="button" class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="setFollowUpDays(30)">30d</button>
-                <button type="button" class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="setFollowUpDays(45)">45d</button>
-                <button type="button" class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="setFollowUpDays(60)">60d</button>
-                <button type="button" class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="setFollowUpDays(90)">90d</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px 12px;font-size:12px;min-height:44px" onclick="setFollowUpDays(7)">1 Wk</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px 12px;font-size:12px;min-height:44px" onclick="setFollowUpDays(14)">2 Wks</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px 12px;font-size:12px;min-height:44px" onclick="setFollowUpDays(30)">30d</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px 12px;font-size:12px;min-height:44px" onclick="setFollowUpDays(45)">45d</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px 12px;font-size:12px;min-height:44px" onclick="setFollowUpDays(60)">60d</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px 12px;font-size:12px;min-height:44px" onclick="setFollowUpDays(90)">90d</button>
               </div>
             </div>
             <div class="form-group full">
@@ -1264,7 +1391,7 @@ body {
         </div>
         <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end">
           <button class="btn btn-secondary" onclick="closeModal('resolveWoModal')">Cancel</button>
-          <button class="btn btn-primary" onclick="resolveWorkOrder()">💾 Save Changes</button>
+          <button class="btn btn-primary" id="btnResolveWO" onclick="resolveWorkOrder()">💾 Save Changes</button>
         </div>
       </div>
     </div>
@@ -1277,6 +1404,13 @@ body {
 
 <script>
 // ===================================================================
+// UTILITY SHORTHANDS
+// ===================================================================
+const $ = id => document.getElementById(id);
+const $val = id => $(id)?.value.trim() ?? '';
+const todayISO = () => new Date().toISOString().split('T')[0];
+
+// ===================================================================
 // DATA LAYER — Mock data from real Excel, swappable to Airtable
 // ===================================================================
 
@@ -1286,8 +1420,19 @@ const CONFIG = {
     baseId: '',
     tables: { machines: 'Machines', serviceLog: 'Service Log', operators: 'Operators' }
   },
-  useAirtable: false
+  useAirtable: false,
+  // ── ACCESS CODES — change these ──────────────────────────
+  // Techs: map PIN → operator name (must match operator name in the Operators list)
+  pins: {
+    admin: '1234',
+    tech: { '5678': 'Tech' },   // add more: '1111': 'Jane', '2222': 'Bob'
+    operator: '9012'
+  }
 };
+
+let currentMode = null;       // 'admin' | 'tech' | 'operator'
+let _loginMode  = null;       // selection in progress
+let _loggedInTechName = null; // resolved name for tech mode
 
 // Load saved settings
 try {
@@ -1304,7 +1449,7 @@ const LocalStore = {
     if (CONFIG.useAirtable) return; // don't cache when Airtable is source of truth
     try {
       localStorage.setItem(this._key, JSON.stringify({
-        machines, workOrders, operators, machineCount: INLINE_MACHINE_COUNT, savedAt: new Date().toISOString()
+        machines, workOrders, operators, activityLog, machineCount: INLINE_MACHINE_COUNT, savedAt: new Date().toISOString()
       }));
     } catch(e) { toast('Local storage full — export your data before it is lost!', 'error'); }
   },
@@ -1316,6 +1461,7 @@ const LocalStore = {
       if (data.machines) machines = data.machines;
       if (data.workOrders) workOrders = data.workOrders;
       if (data.operators) operators = data.operators;
+      if (data.activityLog) activityLog = data.activityLog;
       return true;
     } catch(e) { return false; }
   },
@@ -1323,6 +1469,82 @@ const LocalStore = {
     localStorage.removeItem(this._key);
   }
 };
+
+let activityLog = []; // Transaction log: {ts, type, woId, machineId, text}
+
+function logActivity(type, woId, machineId, text) {
+  activityLog.unshift({
+    ts: new Date().toISOString(),
+    type, // 'created','closed','pending','assigned','pm','updated'
+    woId: woId || '',
+    machineId: machineId || '',
+    text: text || '',
+  });
+  // Keep last 50 entries
+  if (activityLog.length > 50) activityLog.length = 50;
+  renderActivityFeed();
+}
+
+function renderActivityFeed() {
+  const el = $('recentActivity');
+  if (!el) return;
+  const icons = { created:'🔧', closed:'✓', pending:'⏳', assigned:'👷', pm:'⚠', updated:'📝' };
+  const colors = { created:'var(--red)', closed:'var(--green)', pending:'var(--amber)', assigned:'var(--blue)', pm:'var(--amber)', updated:'var(--text-muted)' };
+  const items = activityLog.slice(0, 12);
+
+  if (items.length === 0) {
+    // Fallback: if no activity log yet, show WO snapshot (backwards compat)
+    const recent = [...workOrders].sort((a,b) => {
+      const dateA = a.workCompleted || a.workStarted || a.reportedDate;
+      const dateB = b.workCompleted || b.workStarted || b.reportedDate;
+      return new Date(dateB) - new Date(dateA);
+    }).slice(0,8);
+    el.innerHTML = recent.map(w => {
+      const dotColor = w.status==='Closed' ? 'var(--green)' : w.status==='Pending' ? 'var(--amber)' : 'var(--red)';
+      const click = w.status!=='Closed' ? `onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"` : '';
+      const statusTag = w.status==='Closed'
+        ? '<span style="color:var(--green);font-size:11px;font-weight:600">✓ Completed</span>'
+        : w.status==='Pending'
+        ? '<span style="color:var(--amber);font-size:11px;font-weight:600">⏳ Pending follow-up</span>'
+        : '<span style="color:var(--red);font-size:11px;font-weight:600">↗ Open</span>';
+      const actDate = w.workCompleted || w.reportedDate;
+      return `<div class="activity-item" ${click}>
+        <div class="activity-dot" style="background:${dotColor}"></div>
+        <div>
+          <div class="activity-text"><strong>${esc(w.machineId)}</strong> — ${esc(w.notes.substring(0,55))}${w.notes.length>55?'…':''} ${statusTag}</div>
+          <div class="activity-time">${formatDate(actDate)} · ${esc(w.assignedTech) || 'Unassigned'}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  el.innerHTML = items.map(a => {
+    const icon = icons[a.type] || '📝';
+    const dotColor = colors[a.type] || 'var(--text-muted)';
+    const click = (a.type !== 'closed' && a.woId) ? `onclick="openResolveWO('${esc(a.woId)}')" style="cursor:pointer"` : '';
+    const ago = timeAgo(a.ts);
+    return `<div class="activity-item" ${click}>
+      <div class="activity-dot" style="background:${dotColor}"></div>
+      <div>
+        <div class="activity-text"><span style="font-size:13px">${icon}</span> <strong>${esc(a.machineId)}</strong> — ${esc(a.text)}</div>
+        <div class="activity-time">${ago}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(isoStr) {
+  const diff = Date.now() - new Date(isoStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + 'd ago';
+  return formatDate(isoStr);
+}
 
 // ---- OPERATORS (from Excel Lookup > Technicians) ----
 let operators = [
@@ -1336,17 +1558,17 @@ let operators = [
   { id: 'op-8', name: 'External Service', role: 'External Service', active: true },
 ];
 
-// ---- MACHINES (from Airtable Machines table — all 192) ----
+// ---- MACHINES (from Airtable Machines table — 182 unique) ----
 let machines = [
   { id:'AFI-221', name:'Oscilator machine', type:'Foam oscillatting cutter', location:'Rigid Foam', manufacturer:'Wintech', model:'D0Z2018-2225-BCT', serviceFreqDays:30, lastService:'2025-10-07', status:'Operational', manualLink:'https://wintech.com' },
   { id:'QFP-81', name:'Brown Machinery', type:'Plastic Machinery', location:'Raw Materials', manufacturer:'John Brown Plastic Machinery', model:'R-223-E', serviceFreqDays:60, lastService:'2025-11-26', status:'Operational', manualLink:'' },
   { id:'QFP-396', name:'BROWN MACHINE', type:'Plastic Machinery', location:'Raw Materials', manufacturer:'Brown Machine', model:'', serviceFreqDays:60, lastService:'2025-10-15', status:'Operational', manualLink:'' },
   { id:'QFP-544', name:'Bandsaw Jet 18', type:'Band Saw', location:'Fabrication', manufacturer:'', model:'JWBS-18QT', serviceFreqDays:90, lastService:'2025-10-21', status:'Operational', manualLink:'' },
-  { id:'QFP-531A', name:'Flow Waterjet', type:'Waterjet', location:'Waterjet Dept', manufacturer:'WardJet', model:'4020 Quad Head 044917-1 Mach 3', serviceFreqDays:30, lastService:'2025-08-01', status:'Down - Non-Critical', manualLink:'https://flowwaterjet.com' },
+  { id:'QFP-531A', name:'Flow Waterjet', type:'Waterjet', location:'Waterjet Dept', manufacturer:'WardJet', model:'4020 Quad Head 044917-1 Mach 3', serviceFreqDays:30, lastService:'2025-08-01', status:'Down - Non-Critical', downSince:'2025-08-01T08:00:00Z', manualLink:'https://flowwaterjet.com' },
   { id:'AFI-125', name:'Bldg C Laminator', type:'Laminator', location:'Building C', manufacturer:'Veit-Kannegiesser', model:'Multstar CLF 1400L', serviceFreqDays:60, lastService:'2025-09-30', status:'Operational', manualLink:'' },
   { id:'AFI-33', name:'Seat Fab Router', type:'Router', location:'Seat Fab', manufacturer:'Grizzly', model:'G8030', serviceFreqDays:90, lastService:'2025-08-05', status:'Operational', manualLink:'https://grizzly.com' },
   { id:'QFP-577A', name:'Wardjet Z', type:'Waterjet', location:'Waterjet Dept', manufacturer:'Wardjet', model:'Z -2543', serviceFreqDays:30, lastService:'2025-10-02', status:'Operational', manualLink:'https://wardjet.com' },
-  { id:'AFI-191', name:'Plastic Dept Maac ASP', type:'Vaccuum Former', location:'Plastic Dept', manufacturer:'MAAC', model:'ASP', serviceFreqDays:45, lastService:'2025-08-07', status:'Down - Non-Critical', manualLink:'https://maacmachinery.com' },
+  { id:'AFI-191', name:'Plastic Dept Maac ASP', type:'Vaccuum Former', location:'Plastic Dept', manufacturer:'MAAC', model:'ASP', serviceFreqDays:45, lastService:'2025-08-07', status:'Down - Non-Critical', downSince:'2025-08-07T08:00:00Z', manualLink:'https://maacmachinery.com' },
   { id:'AFI-254', name:'Plastic Dept Maac', type:'Vaccuum Former', location:'Plastic Dept', manufacturer:'MAAC', model:'C64S', serviceFreqDays:45, lastService:'2025-08-15', status:'Operational', manualLink:'https://maacmachinery.com' },
   { id:'AFI-87', name:'Gerber', type:'Leather Cut', location:'Building C', manufacturer:'Gerber Taurus 2', model:'', serviceFreqDays:60, lastService:'2025-09-11', status:'Operational', manualLink:'https://lectra.com' },
   { id:'AFI-257', name:'PathFinder', type:'Fabric CNC', location:'Fabrication', manufacturer:'PathFinder', model:'8038', serviceFreqDays:60, lastService:'2025-11-11', status:'Operational', manualLink:'https://pathfindercutting.com' },
@@ -1371,7 +1593,6 @@ let machines = [
   { id:'AFI-114B', name:'Sewing Machine - M Type 576', type:'Sewing Machine', location:'Building C', manufacturer:'Durkopp Adler', model:'M Type 576', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-114C', name:'Sewing Machine - M Type 576', type:'Sewing Machine', location:'Building C', manufacturer:'Durkopp Adler', model:'M Type 576', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-124', name:'Spray Tunnel - SaniMister S-2438', type:'Spray Tunnel', location:'Flexible Fab Dept', manufacturer:'Viking', model:'SaniMister S-2438', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-125', name:'Laminator - Multstar CFL 1400L', type:'Laminator', location:'Building C', manufacturer:'Veit-Kannegiesser', model:'Multstar CFL 1400L', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-126', name:'Flammability Tester - VC-2 Flammablity Tester', type:'Flammability Tester', location:'Quality Dept', manufacturer:'Deatak', model:'VC-2 Flammablity Tester', serviceFreqDays:90, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-127A', name:'Dryer - DT-422 Turbo Jet Star', type:'Dryer', location:'Flexible Fab Dept', manufacturer:'Ranar', model:'DT-422 Turbo Jet Star', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-127B', name:'Dryer - DT-422 Turbo Jet Star', type:'Dryer', location:'Flexible Fab Dept', manufacturer:'Ranar', model:'DT-422 Turbo Jet Star', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
@@ -1394,7 +1615,6 @@ let machines = [
   { id:'AFI-150', name:'Cutting Machine - Blue Streak 2', type:'Cutting Machine', location:'Fireblock Dept', manufacturer:'Eastman', model:'Blue Streak 2', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-151 A -R', name:'Chairs - 18  Chairs', type:'Chairs', location:'Building C', manufacturer:'', model:'18  Chairs', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-155', name:'Sewing Machine - AE-8050H', type:'Sewing Machine', location:'Building C', manufacturer:'Checkit', model:'AE-8050H', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-16', name:'Vacuum Former - ASP', type:'Vacuum Former', location:'Plastic Dept', manufacturer:'Macc', model:'ASP', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-164A', name:'Bandsaw - JWBS-20QT-3', type:'Bandsaw', location:'Seat Fab Dept', manufacturer:'Jet', model:'JWBS-20QT-3', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-164B', name:'Bandsaw - JWBS-20QT-3', type:'Bandsaw', location:'Seat Fab Dept', manufacturer:'Jet', model:'JWBS-20QT-3', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-165', name:'Sewing Machine - HCS2-1201-30', type:'Sewing Machine', location:'Building C', manufacturer:'Happy', model:'HCS2-1201-30', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
@@ -1410,7 +1630,6 @@ let machines = [
   { id:'AFI-184', name:'Oven - 9231-HP-UA-17', type:'Oven', location:'Plastic Dept', manufacturer:'Sammons', model:'9231-HP-UA-17', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-185B', name:'Sewing Machine - M Type 576', type:'Sewing Machine', location:'Building C', manufacturer:'Durkopp Adler', model:'M Type 576', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-187', name:'Velcro Cutter - HC530A', type:'Velcro Cutter', location:'Fireblock Dept', manufacturer:'Sheffield', model:'HC530A', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-191', name:'Vacuum Former - ASP', type:'Vacuum Former', location:'Plastic Dept', manufacturer:'Macc', model:'ASP', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-195', name:'Vacuum Former - ASP', type:'Vacuum Former', location:'Plastic Dept', manufacturer:'Macc', model:'ASP', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-198A', name:'Marking Machines - Jet Stamp 790MP', type:'Marking Machines', location:'Plastic Fab Dept', manufacturer:'Rein', model:'Jet Stamp 790MP', serviceFreqDays:90, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-198B', name:'Marking Machines - Jet Stamp 790MP', type:'Marking Machines', location:'Plastic Fab Dept', manufacturer:'Rein', model:'Jet Stamp 790MP', serviceFreqDays:90, lastService:'', status:'Operational', manualLink:'' },
@@ -1424,7 +1643,6 @@ let machines = [
   { id:'AFI-209', name:'Air Cutter - Falcon End Cutter', type:'Air Cutter', location:'Building C', manufacturer:'Eastman', model:'Falcon End Cutter', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-216', name:'Sewing Machine - CNC Quilting Machine', type:'Sewing Machine', location:'Leather Dept 2', manufacturer:'ABM Int', model:'CNC Quilting Machine', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-220', name:'CNC Contour Cutter - DOZ2225-BCT', type:'CNC Contour Cutter', location:'Rigid Foam Dept', manufacturer:'Wintech', model:'DOZ2225-BCT', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-221', name:'CNC Contour Cutter - FWCS2550/20FT', type:'CNC Contour Cutter', location:'Rigid Foam Dept', manufacturer:'Wintech', model:'FWCS2550/20FT', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-223', name:'Sewing Machine - HX88-4TD-03', type:'Sewing Machine', location:'Leather Dept 1', manufacturer:'Hikari', model:'HX88-4TD-03', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-224', name:'Sewing Machine - M Type 867', type:'Sewing Machine', location:'Leather Dept 2', manufacturer:'Durkopp Adler', model:'M Type 867', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-225A', name:'Sewing Machine - MH2654', type:'Sewing Machine', location:'Fireblock Dept', manufacturer:'Mauser', model:'MH2654', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
@@ -1455,7 +1673,6 @@ let machines = [
   { id:'AFI-255A', name:'Vacuum Former - 2011 Comet', type:'Vacuum Former', location:'Plastic Dept', manufacturer:'Macc', model:'2011 Comet', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-255B', name:'Vacuum Pump - RC0063.E506.1001', type:'Vacuum Pump', location:'Plastic Dept', manufacturer:'Busch', model:'RC0063.E506.1001', serviceFreqDays:90, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-256', name:'Air Cutter - Falcon End Cutter', type:'Air Cutter', location:'Building C', manufacturer:'Eastman', model:'Falcon End Cutter', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-257', name:'Digital Cutting Table - Pathfinder', type:'Digital Cutting Table', location:'Fireblock Dept', manufacturer:'Pathfinder', model:'', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-258', name:'Bandsaw - M3764', type:'Bandsaw', location:'Seat Glue Dept', manufacturer:'Gruppo Grassi', model:'M3764', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-259', name:'Sewing Machine - M Type 869', type:'Sewing Machine', location:'Leather Dept 2', manufacturer:'Durkopp Adler', model:'M Type 869', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-261', name:'Vacuum Pump - VTLF2.250/0-79', type:'Vacuum Pump', location:'CNC Dept', manufacturer:'Becker', model:'VTLF2.250/0-79', serviceFreqDays:90, lastService:'', status:'Operational', manualLink:'' },
@@ -1473,7 +1690,6 @@ let machines = [
   { id:'AFI-30', name:'Pallet Racking - 10 Racks', type:'Pallet Racking', location:'Building C', manufacturer:'QHM', model:'10 Racks', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-31', name:'Router - G9981', type:'Router', location:'Rigid Foam Dept', manufacturer:'Grizzly', model:'G9981', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-32', name:'Engineering - Tracer', type:'Engineering', location:'Building C', manufacturer:'Logic Tec', model:'Tracer', serviceFreqDays:180, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-33', name:'Router - G9981', type:'Router', location:'Seat Fab Dept', manufacturer:'Grizzly', model:'G9981', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-36A', name:'Sewing Machine - M Type 576', type:'Sewing Machine', location:'Building C', manufacturer:'Durkopp Adler', model:'M Type 576', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-36B', name:'Sewing Machine - M Type 576', type:'Sewing Machine', location:'Fireblock Dept', manufacturer:'Durkopp Adler', model:'M Type 576', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-36C', name:'Sewing Machine - M Type 576', type:'Sewing Machine', location:'Building C', manufacturer:'Durkopp Adler', model:'M Type 576', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
@@ -1494,7 +1710,6 @@ let machines = [
   { id:'AFI-69A', name:'Cabinet - 13x43x65', type:'Cabinet', location:'Plastic Fab Dept', manufacturer:'Justrite', model:'13x43x65', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-82', name:'Air Compressor - ST1100', type:'Air Compressor', location:'Building C', manufacturer:'Sullair', model:'ST1100', serviceFreqDays:90, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-86', name:'Inspection Table - RLM Vet3500', type:'Inspection Table', location:'Building C', manufacturer:'Campbell-Randall', model:'RLM Vet3500', serviceFreqDays:180, lastService:'', status:'Operational', manualLink:'' },
-  { id:'AFI-87', name:'Fabric Cutter - Taurus 2', type:'Fabric Cutter', location:'Building C', manufacturer:'Gerber', model:'Taurus 2', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-88 A-E', name:'Sewing Tables - Custom Sewing Tables', type:'Sewing Tables', location:'Building C', manufacturer:'Doug Heiberg', model:'Custom Sewing Tables', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-89 A-D', name:'Sewing Tables - Custom Sewing Tables', type:'Sewing Tables', location:'Building C', manufacturer:'Doug Heiberg', model:'Custom Sewing Tables', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
   { id:'AFI-95', name:'Pallet Racking - Rack Beams', type:'Pallet Racking', location:'Plastic Fab Dept', manufacturer:'JJ Racking', model:'Rack Beams', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
@@ -1509,11 +1724,9 @@ let machines = [
   { id:'QFP-193', name:'Drill Press - 1600', type:'Drill Press', location:'Rigid Foam Dept', manufacturer:'Walker-Turner', model:'1600', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-22', name:'Drill Press - 1112-23', type:'Drill Press', location:'Rigid Foam Dept', manufacturer:'Walker-Turner', model:'1112-23', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-23', name:'Drill Press - 126-184', type:'Drill Press', location:'Rigid Foam Dept', manufacturer:'Delta', model:'126-184', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
-  { id:'QFP-292', name:'Bandsaw - Temnoni', type:'Bandsaw', location:'Seat Fab Dept', manufacturer:'Temnoni', model:'', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-378', name:'Cutting Machine - Blue Streak 2', type:'Cutting Machine', location:'Fireblock Dept', manufacturer:'Eastman', model:'Blue Streak 2', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-387A', name:'Bandsaw - S5', type:'Bandsaw', location:'Seat Glue Dept', manufacturer:'Ragel', model:'S5', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-387B', name:'Bandsaw - 199-0100', type:'Bandsaw', location:'Seat Glue Dept', manufacturer:'Enco', model:'199-0100', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
-  { id:'QFP-396', name:'Vacuum Former - R223E 6X10', type:'Vacuum Former', location:'Plastic Dept', manufacturer:'Brown', model:'R223E 6X10', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-398', name:'Velcro Cutter - HC530A', type:'Velcro Cutter', location:'Building C', manufacturer:'Sheffield', model:'HC530A', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-430', name:'Sewing Machine - 516-4', type:'Sewing Machine', location:'Fireblock Dept', manufacturer:'Willcox&Gibbs', model:'516-4', serviceFreqDays:30, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-433 A-G', name:'Hampers - McMasterCar', type:'Hampers', location:'Fireblock Dept', manufacturer:'McMasterCar', model:'', serviceFreqDays:365, lastService:'', status:'Operational', manualLink:'' },
@@ -1526,7 +1739,6 @@ let machines = [
   { id:'QFP-59', name:'Bandsaw - M3764', type:'Bandsaw', location:'Seat Glue Dept', manufacturer:'Fecken-Kirfel', model:'M3764', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-60', name:'Die Cutter - AOC60A', type:'Die Cutter', location:'Flexible Fab Dept', manufacturer:'SYSCO', model:'AOC60A', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-64', name:'Router - POR-22-1', type:'Router', location:'Rigid Foam Dept', manufacturer:'Jet', model:'POR-22-1', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
-  { id:'QFP-81', name:'Vacuum Former - R223E 4X6', type:'Vacuum Former', location:'Plastic Dept', manufacturer:'Brown', model:'R223E 4X6', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-91', name:'Buffer - Sand-Rite', type:'Buffer', location:'Seat Fab Dept', manufacturer:'Sand-Rite', model:'Buffer', serviceFreqDays:60, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-9A', name:'Bandsaw - 11\' 8"', type:'Bandsaw', location:'Seat Fab Dept', manufacturer:'Davis & Wells', model:'11\' 8"', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' },
   { id:'QFP-9B', name:'Bandsaw - DB-20-87', type:'Bandsaw', location:'Seat Fab Dept', manufacturer:'Enco', model:'DB-20-87', serviceFreqDays:45, lastService:'', status:'Operational', manualLink:'' }
@@ -1534,25 +1746,27 @@ let machines = [
 
 // ---- WORK ORDERS (from Airtable Service Log table) ----
 let workOrders = [
-  { id:'WO-001', machineId:'AFI-125', machineName:'Bldg C Laminator', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-01', assignedTech:'EO', status:'Closed', notes:'Replaced Bearing', resolutionNotes:'Bearing replaced and tested', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-01', workCompleted:'2025-08-01' },
-  { id:'WO-002', machineId:'QFP-531A', machineName:'Flow Waterjet', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-01', assignedTech:'EO', status:'Closed', notes:'Flow waterjet Wiring and grease', resolutionNotes:'Rewired and greased all rails', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-01', workCompleted:'2025-08-01' },
-  { id:'WO-003', machineId:'AFI-125', machineName:'Bldg C Laminator', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-01', assignedTech:'EO', status:'Closed', notes:'Removed Bladder and grease', resolutionNotes:'Bladder removed and regreased', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-01', workCompleted:'2025-08-01' },
-  { id:'WO-004', machineId:'QFP-531A', machineName:'Flow Waterjet', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-04', assignedTech:'EO', status:'Open', notes:'New wire Harness P/N 044107-5 / Greased Rails', resolutionNotes:'', partsUsed:'', partsCost:0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-04', workCompleted:'' },
-  { id:'WO-005', machineId:'AFI-125', machineName:'Bldg C Laminator', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-04', assignedTech:'EO', status:'Closed', notes:'Greased and Clean / Replaced Bladder', resolutionNotes:'Cleaned and bladder replaced', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-04', workCompleted:'2025-08-04' },
-  { id:'WO-006', machineId:'AFI-33', machineName:'Seat Fab Router', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-05', assignedTech:'EO', status:'Closed', notes:'ON/OFF SWITCH / REFIT AIR REGULATOR AND AIR HOSES', resolutionNotes:'Switch replaced and air system refit', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-05', workCompleted:'2025-08-05' },
-  { id:'WO-007', machineId:'QFP-577A', machineName:'Wardjet Z', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-05', assignedTech:'EO', status:'Closed', notes:'High Pressure line and Transition Block on head 1 to 4', resolutionNotes:'HP lines and transition blocks replaced on all 4 heads', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-05', workCompleted:'2025-08-05' },
-  { id:'WO-008', machineId:'AFI-191', machineName:'Plastic Dept Maac ASP', incidentType:'Repair', priority:'Medium', category:'Electrical', reportedBy:'EO', reportedDate:'2025-08-07', assignedTech:'EO', status:'Open', notes:'Replaced Fuse for Oven', resolutionNotes:'', partsUsed:'', partsCost:0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-07', workCompleted:'' },
-  { id:'WO-009', machineId:'QFP-577A', machineName:'Wardjet Z', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-06', assignedTech:'EO', status:'Closed', notes:'Replaced High pressure line', resolutionNotes:'HP line replaced and tested', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-06', workCompleted:'2025-08-06' },
-  { id:'WO-010', machineId:'AFI-254', machineName:'Plastic Dept Maac', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-15', assignedTech:'EO', status:'Closed', notes:'Replaced Disconnect on Clamp Frames', resolutionNotes:'Disconnect replaced on clamp frames', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-15', workCompleted:'2025-08-15' },
-  { id:'WO-011', machineId:'AFI-257', machineName:'PathFinder', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-14', assignedTech:'EO', status:'Closed', notes:'Switch on PathFinder (Fireblock Dept)', resolutionNotes:'Switch replaced', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-14', workCompleted:'2025-08-14' },
-  { id:'WO-012', machineId:'QFP-81', machineName:'Brown Machinery', incidentType:'Preventive', priority:'Medium', category:'Scheduled PM', reportedBy:'EO', reportedDate:'2025-08-14', assignedTech:'EO', status:'Closed', notes:'Brown Machine Oven PM', resolutionNotes:'PM completed — oven inspected and cleaned', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:true, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-14', workCompleted:'2025-08-14' },
-  { id:'WO-013', machineId:'AFI-87', machineName:'Gerber', incidentType:'Preventive', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-09-11', assignedTech:'EO', status:'Closed', notes:'Gerber PM service - cleaned and inspected', resolutionNotes:'Full PM service completed', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:true, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-09-11', workCompleted:'2025-09-11' },
-  { id:'WO-014', machineId:'AFI-16', machineName:'MAAC ASP #1', incidentType:'Preventive', priority:'Medium', category:'Scheduled PM', reportedBy:'EO', reportedDate:'2025-12-08', assignedTech:'EO', status:'Closed', notes:'MAAC ASP quarterly PM completed', resolutionNotes:'Quarterly PM — all checks passed', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:true, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-12-08', workCompleted:'2025-12-08' },
-  { id:'WO-015', machineId:'QFP-577B', machineName:'Hypertherm', incidentType:'Repair', priority:'High', category:'Pressure System', reportedBy:'EO', reportedDate:'2025-09-16', assignedTech:'EO', status:'Closed', notes:'Replaced seals on intensifier pump', resolutionNotes:'Intensifier pump seals replaced and pressure tested', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-09-16', workCompleted:'2025-09-16' }
+  { id:'WO-001', machineId:'AFI-125', machineName:'Bldg C Laminator', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-01', assignedTech:'EO', status:'Closed', notes:'Replaced Bearing', resolutionNotes:'Bearing replaced and tested', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-01', workCompleted:'2025-08-01', machineDown: false },
+  { id:'WO-002', machineId:'QFP-531A', machineName:'Flow Waterjet', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-01', assignedTech:'EO', status:'Closed', notes:'Flow waterjet Wiring and grease', resolutionNotes:'Rewired and greased all rails', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-01', workCompleted:'2025-08-01', machineDown: false },
+  { id:'WO-003', machineId:'AFI-125', machineName:'Bldg C Laminator', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-01', assignedTech:'EO', status:'Closed', notes:'Removed Bladder and grease', resolutionNotes:'Bladder removed and regreased', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-01', workCompleted:'2025-08-01', machineDown: false },
+  { id:'WO-004', machineId:'QFP-531A', machineName:'Flow Waterjet', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-04', assignedTech:'EO', status:'Open', notes:'New wire Harness P/N 044107-5 / Greased Rails', resolutionNotes:'', partsUsed:'', partsCost:0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-04', workCompleted:'', machineDown: false },
+  { id:'WO-005', machineId:'AFI-125', machineName:'Bldg C Laminator', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-04', assignedTech:'EO', status:'Closed', notes:'Greased and Clean / Replaced Bladder', resolutionNotes:'Cleaned and bladder replaced', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-04', workCompleted:'2025-08-04', machineDown: false },
+  { id:'WO-006', machineId:'AFI-33', machineName:'Seat Fab Router', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-05', assignedTech:'EO', status:'Closed', notes:'ON/OFF SWITCH / REFIT AIR REGULATOR AND AIR HOSES', resolutionNotes:'Switch replaced and air system refit', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-05', workCompleted:'2025-08-05', machineDown: false },
+  { id:'WO-007', machineId:'QFP-577A', machineName:'Wardjet Z', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-05', assignedTech:'EO', status:'Closed', notes:'High Pressure line and Transition Block on head 1 to 4', resolutionNotes:'HP lines and transition blocks replaced on all 4 heads', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-05', workCompleted:'2025-08-05', machineDown: false },
+  { id:'WO-008', machineId:'AFI-191', machineName:'Plastic Dept Maac ASP', incidentType:'Repair', priority:'Medium', category:'Electrical', reportedBy:'EO', reportedDate:'2025-08-07', assignedTech:'EO', status:'Open', notes:'Replaced Fuse for Oven', resolutionNotes:'', partsUsed:'', partsCost:0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-07', workCompleted:'', machineDown: false },
+  { id:'WO-009', machineId:'QFP-577A', machineName:'Wardjet Z', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-06', assignedTech:'EO', status:'Closed', notes:'Replaced High pressure line', resolutionNotes:'HP line replaced and tested', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-06', workCompleted:'2025-08-06', machineDown: false },
+  { id:'WO-010', machineId:'AFI-254', machineName:'Plastic Dept Maac', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-15', assignedTech:'EO', status:'Closed', notes:'Replaced Disconnect on Clamp Frames', resolutionNotes:'Disconnect replaced on clamp frames', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-15', workCompleted:'2025-08-15', machineDown: false },
+  { id:'WO-011', machineId:'AFI-257', machineName:'PathFinder', incidentType:'Repair', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-08-14', assignedTech:'EO', status:'Closed', notes:'Switch on PathFinder (Fireblock Dept)', resolutionNotes:'Switch replaced', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-14', workCompleted:'2025-08-14', machineDown: false },
+  { id:'WO-012', machineId:'QFP-81', machineName:'Brown Machinery', incidentType:'Preventive', priority:'Medium', category:'Scheduled PM', reportedBy:'EO', reportedDate:'2025-08-14', assignedTech:'EO', status:'Closed', notes:'Brown Machine Oven PM', resolutionNotes:'PM completed — oven inspected and cleaned', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:true, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-08-14', workCompleted:'2025-08-14', machineDown: false },
+  { id:'WO-013', machineId:'AFI-87', machineName:'Gerber', incidentType:'Preventive', priority:'Medium', category:'Mechanical', reportedBy:'EO', reportedDate:'2025-09-11', assignedTech:'EO', status:'Closed', notes:'Gerber PM service - cleaned and inspected', resolutionNotes:'Full PM service completed', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:true, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-09-11', workCompleted:'2025-09-11', machineDown: false },
+  { id:'WO-014', machineId:'AFI-16', machineName:'MAAC ASP #1', incidentType:'Preventive', priority:'Medium', category:'Scheduled PM', reportedBy:'EO', reportedDate:'2025-12-08', assignedTech:'EO', status:'Closed', notes:'MAAC ASP quarterly PM completed', resolutionNotes:'Quarterly PM — all checks passed', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:true, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-12-08', workCompleted:'2025-12-08', machineDown: false },
+  { id:'WO-015', machineId:'QFP-577B', machineName:'Hypertherm', incidentType:'Repair', priority:'High', category:'Pressure System', reportedBy:'EO', reportedDate:'2025-09-16', assignedTech:'EO', status:'Closed', notes:'Replaced seals on intensifier pump', resolutionNotes:'Intensifier pump seals replaced and pressure tested', partsUsed:'', partsCost:0.0, laborCost:0, _isPM:false, followUp:'No', followUpDate:'', followUpNotes:'', workStarted:'2025-09-16', workCompleted:'2025-09-16', machineDown: false }
 ];
 
 // Dynamically derived from machine data
-const LOCATIONS = [...new Set(machines.map(m => m.location).filter(Boolean))].sort();
+function getLocations() {
+  return [...new Set(machines.map(m => m.location).filter(Boolean))].sort();
+}
 const INLINE_MACHINE_COUNT = machines.length;
 
 // ===================================================================
@@ -1573,7 +1787,7 @@ const AirtableAPI = {
       const res = await fetch(url, { headers: this.headers() });
       if (!res.ok) throw new Error(`Airtable ${res.status}: ${res.statusText}`);
       const data = await res.json();
-      all = all.concat(data.records);
+      all.push(...data.records);
       offset = data.offset;
       page++;
     } while (offset);
@@ -1625,6 +1839,7 @@ const DataService = {
           manualLink: r.fields['Manual_Link'] || r.fields['Manual Link'] || '',
           nextServiceOverride: r.fields['Next_Service_Override'] || '',
           _followUpNotes: r.fields['Override_Notes'] || '',
+          downSince: r.fields['Down_Since'] || '',
         }));
       } catch(e) { toast('Airtable fetch failed: ' + e.message, 'error'); }
     }
@@ -1657,6 +1872,7 @@ const DataService = {
           resolutionNotes: r.fields['Resolution_Notes'] || '',
           workStarted: r.fields['Work_Started'] || '',
           workCompleted: r.fields['Work_Completed'] || '',
+          machineDown: r.fields['Machine_Down'] || false,
         }));
       } catch(e) { toast('Airtable fetch failed: ' + e.message, 'error'); }
     }
@@ -1692,9 +1908,9 @@ const DataService = {
           'Status': wo.status,
           'Notes': wo.notes,
           'Is_PM': wo._isPM || false,
+          'Machine_Down': wo.machineDown || false,
         };
-        const result = await AirtableAPI.createRecord(CONFIG.airtable.tables.serviceLog, fields);
-        wo._airtableId = result.id;
+        wo._airtableId = (await AirtableAPI.createRecord(CONFIG.airtable.tables.serviceLog, fields)).id;
       } catch(e) {
         toast('Work order NOT saved — Airtable write failed: ' + e.message, 'error');
         return false; // signal failure to caller
@@ -1712,8 +1928,7 @@ const DataService = {
           'Location': m.location, 'Manufacturer': m.manufacturer, 'Model': m.model,
           'Service_Freq_Days': m.serviceFreqDays, 'Status': m.status,
         };
-        const result = await AirtableAPI.createRecord(CONFIG.airtable.tables.machines, fields);
-        m._airtableId = result.id;
+        m._airtableId = (await AirtableAPI.createRecord(CONFIG.airtable.tables.machines, fields)).id;
       } catch(e) {
         toast('Machine NOT saved — Airtable write failed: ' + e.message, 'error');
         return false;
@@ -1727,8 +1942,7 @@ const DataService = {
     if (CONFIG.useAirtable) {
       try {
         const fields = { 'Name': op.name, 'Role': op.role, 'Active': true };
-        const result = await AirtableAPI.createRecord(CONFIG.airtable.tables.operators, fields);
-        op._airtableId = result.id;
+        op._airtableId = (await AirtableAPI.createRecord(CONFIG.airtable.tables.operators, fields)).id;
       } catch(e) {
         toast('Operator NOT saved — Airtable write failed: ' + e.message, 'error');
         return false;
@@ -1758,47 +1972,42 @@ function detailCell(label, value, extraClass) {
 
 function esc(str) {
   if (str === null || str === undefined) return '';
-  const d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-function daysSince(dateStr) {
-  if (!dateStr) return 9999;
-  const d = new Date(dateStr);
-  const now = new Date();
-  return Math.floor((now - d) / (1000*60*60*24));
+// FIX H-4: Parse date-only strings as local noon to avoid UTC offset showing wrong day
+function parseLocalDate(dateStr) {
+  if (!dateStr) return null;
+  const dt = (typeof dateStr === 'string' && !dateStr.includes('T')) ? new Date(dateStr + 'T12:00:00') : new Date(dateStr);
+  return isNaN(dt) ? null : dt;
+}
+function getNextServiceDate(machine) {
+  if (machine.nextServiceOverride) {
+    const override = parseLocalDate(machine.nextServiceOverride);
+    if (override) return override;
+  }
+  if (!machine.lastService) return null;
+  const last = parseLocalDate(machine.lastService);
+  if (!last) return null;
+  return new Date(last.getTime() + machine.serviceFreqDays * 86400000);
 }
 function daysUntilService(machine) {
-  // Check for follow-up override first — takes priority over normal calculation
-  if (machine.nextServiceOverride) {
-    const override = new Date(machine.nextServiceOverride);
-    const now = new Date();
-    return Math.floor((override - now) / 86400000);
-  }
-  if (!machine.lastService) return -9999;
-  const last = new Date(machine.lastService);
-  const next = new Date(last.getTime() + machine.serviceFreqDays * 86400000);
-  const now = new Date();
-  return Math.floor((next - now) / 86400000);
+  const next = getNextServiceDate(machine);
+  return next ? Math.floor((next - new Date()) / 86400000) : -9999;
 }
 function nextServiceDate(machine) {
-  if (machine.nextServiceOverride) {
-    return new Date(machine.nextServiceOverride).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-  }
-  if (!machine.lastService) return 'Unknown';
-  const last = new Date(machine.lastService);
-  const next = new Date(last.getTime() + machine.serviceFreqDays * 86400000);
-  return next.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const next = getNextServiceDate(machine);
+  return next ? next.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Unknown';
 }
 function formatDate(d) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const parsed = parseLocalDate(d);
+  return parsed ? parsed.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
 }
 
 // FIX: Error toasts persist 8s, critical errors persist until clicked
 function toast(msg, type='success') {
-  const c = document.getElementById('toastContainer');
+  const c = $('toastContainer');
   const t = document.createElement('div');
   t.className = 'toast ' + (type||'');
   t.textContent = msg;
@@ -1824,11 +2033,41 @@ function debounce(fn, ms) {
 }
 
 // ===================================================================
+// SHARED RENDERING HELPERS
+// ===================================================================
+function woBadgeClass(s) {
+  return s === 'Open' ? 'badge-open' : s === 'Pending' ? 'badge-pending' : 'badge-closed';
+}
+function badgeStatus(s, extra) {
+  return `<span class="badge-status ${woBadgeClass(s)}">${esc(s)}${extra||''}</span>`;
+}
+function machineBadge(m, dts) {
+  if (dts < 0 && dts !== -9999) return '<span class="badge-status badge-overdue">⚠ OVERDUE ' + Math.abs(dts) + 'd</span>';
+  return `<span class="badge-status ${m.status === 'Down - Critical' || m.status === 'Down - Non-Critical' ? 'badge-critical' : 'badge-operational'}">${esc(m.status)}</span>`;
+}
+function renderChart(data, colors, defColor) {
+  const max = Math.max(...Object.values(data), 1);
+  return Object.entries(data).sort((a,b) => b[1]-a[1]).map(([k,v]) =>
+    `<div class="bar-chart-row"><div class="bar-label">${esc(k)}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/max)*100}%;background:${colors[k]||defColor}"></div></div><div class="bar-count">${v}</div></div>`
+  ).join('');
+}
+function renderServiceHistory(wos) {
+  if (!wos.length) return '<p style="color:var(--text-muted);font-size:13px">No service history recorded.</p>';
+  return `<table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Tech</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+    ${wos.slice(0,10).map(w => `<tr ${w.status!=='Closed'?`onclick="closeModal('machineModal');openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
+      <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td><td>${esc(w.incidentType)}</td>
+      <td>${esc(w.assignedTech) || '<span style="color:var(--text-muted);font-style:italic">—</span>'}</td>
+      <td>${badgeStatus(w.status, w.status==='Open'?' ↗':'')}</td><td class="cell-truncate">${esc(w.notes)}</td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ===================================================================
 // NAVIGATION
 // ===================================================================
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
+  $('page-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const btns = document.querySelectorAll('.nav-btn');
   const map = { dashboard:0, machines:1, workorders:2, scan:3, operators:4, settings:5 };
@@ -1837,42 +2076,35 @@ function showPage(name) {
   if (name === 'machines') renderMachines();
   if (name === 'workorders') renderWorkOrders();
   if (name === 'operators') renderOperators();
-  if (name === 'scan') document.getElementById('scanInput').focus();
+  if (name === 'scan') { $('scanInput').focus(); $('scanResult').innerHTML = ''; }
   // Hide FAB when already on scan page
-  const fab = document.getElementById('scanFab');
+  const fab = $('scanFab');
   if (fab) fab.classList.toggle('hide-on-scan', name === 'scan');
   // close mobile sidebar
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
+  $('sidebar').classList.remove('open');
+  $('sidebarOverlay').classList.remove('open');
 }
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
+  $('sidebar').classList.toggle('open');
+  $('sidebarOverlay').classList.toggle('open');
 }
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
 
 // ===================================================================
-// DASHBOARD
-// ===================================================================
-// ===================================================================
-// AUTO-GENERATE PM WORK ORDERS
+// DASHBOARD & PM GENERATION
 // ===================================================================
 let _pmGenerated = false;
 async function generatePMWorkOrders() {
   if (_pmGenerated) return;
   _pmGenerated = true;
-  const overdueMachines = machines.filter(m => daysUntilService(m) < 0);
+  // Only generate PMs for machines with known service history — skip machines with no lastService
+  const overdueMachines = machines.filter(m => m.lastService && daysUntilService(m) < 0);
+  const activePMs = new Set(workOrders.filter(w => (w.status === 'Open' || w.status === 'Pending') && w._isPM).map(w => w.machineId));
   let created = 0;
 
   for (const m of overdueMachines) {
-    // Check if there's already an open PM work order for this machine
-    const existingPM = workOrders.find(w =>
-      w.machineId === m.id &&
-      w.status === 'Open' &&
-      w._isPM === true
-    );
-    if (existingPM) continue; // already queued, skip
+    if (activePMs.has(m.id)) continue; // already queued, skip
 
     const daysOver = Math.abs(daysUntilService(m));
     const priority = daysOver > 90 ? 'High' : daysOver > 30 ? 'Medium' : 'Low';
@@ -1885,7 +2117,7 @@ async function generatePMWorkOrders() {
       priority: priority,
       category: 'Scheduled PM',
       reportedBy: 'System',
-      reportedDate: new Date().toISOString().split('T')[0],
+      reportedDate: todayISO(),
       assignedTech: '',
       status: 'Open',
       notes: `Auto-generated PM — ${m.serviceFreqDays}-day service interval overdue by ${daysOver} days. Last serviced ${formatDate(m.lastService)}.`,
@@ -1896,14 +2128,18 @@ async function generatePMWorkOrders() {
       followUpDate: '',
       followUpNotes: '',
       resolutionNotes: '',
+      workStarted: '',
+      workCompleted: '',
       _isPM: true, // flag to prevent duplicates
     };
 
     await DataService.addWorkOrder(wo);
+    logActivity('pm', wo.id, m.id, `PM auto-generated — ${daysOver}d overdue (${m.serviceFreqDays}d interval)`);
     created++;
   }
 
   if (created > 0) {
+    LocalStore.save(); // Persist activity log entries from PM generation
     toast(`${created} PM work order${created>1?'s':''} auto-generated for overdue machines`, 'warning');
   }
 }
@@ -1911,23 +2147,39 @@ async function generatePMWorkOrders() {
 // ===================================================================
 // DASHBOARD
 // ===================================================================
+let _refreshing = false;
 async function refreshDashboard() {
+  if (_refreshing) return;
+  _refreshing = true;
+  const refreshBtn = document.querySelector('#page-dashboard .btn-secondary');
+  if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = '↻ Syncing…'; }
+
+  try {
   await DataService.getMachines();
   await DataService.getWorkOrders();
+  await DataService.getOperators();
 
   // AUTO-GENERATE PM WORK ORDERS for overdue machines
   await generatePMWorkOrders();
 
-  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  if (CONFIG.useAirtable) {
+    const ts = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+    $('dashDate').innerHTML = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) +
+      ` <span style="font-size:11px;color:var(--green);font-family:var(--font-mono);margin-left:8px">● Synced ${ts}</span>`;
+  } else {
+    $('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
 
-  const overdue = machines.filter(m => daysUntilService(m) < 0);
+  const activePMsMap = new Map();
+  workOrders.forEach(w => { if ((w.status === 'Open' || w.status === 'Pending') && w._isPM) activePMsMap.set(w.machineId, w); });
+  const overdue = machines.filter(m => m.lastService && daysUntilService(m) < 0);
   const openWO = workOrders.filter(w => w.status === 'Open');
   const pendingWO = workOrders.filter(w => w.status === 'Pending');
   const closedWO = workOrders.filter(w => w.status === 'Closed');
 
-  document.getElementById('openWoBadge').textContent = openWO.length + pendingWO.length;
+  $('openWoBadge').textContent = openWO.length + pendingWO.length;
 
-  document.getElementById('kpiGrid').innerHTML = `
+  $('kpiGrid').innerHTML = `
     <div class="kpi-card overdue"><div class="kpi-accent"></div><div class="kpi-icon">⚠️</div><div class="kpi-value">${overdue.length}</div><div class="kpi-label">Overdue Services</div></div>
     <div class="kpi-card open"><div class="kpi-accent"></div><div class="kpi-icon">🔧</div><div class="kpi-value">${openWO.length}</div><div class="kpi-label">Open Work Orders</div></div>
     <div class="kpi-card" style="--accent:var(--amber)"><div class="kpi-accent"></div><div class="kpi-icon">⏳</div><div class="kpi-value">${pendingWO.length}</div><div class="kpi-label">Pending Follow-up</div></div>
@@ -1936,7 +2188,7 @@ async function refreshDashboard() {
 
   // Overdue table — now links to the PM work order so management can assign directly
   const sorted = [...overdue].sort((a,b) => daysUntilService(a) - daysUntilService(b));
-  document.getElementById('overdueCount').textContent = overdue.length + ' machines';
+  $('overdueCount').textContent = overdue.length + ' machines';
   const tbody = document.querySelector('#overdueTable tbody');
   tbody.innerHTML = sorted.slice(0,10).map(m => {
     const days = Math.abs(daysUntilService(m));
@@ -1958,51 +2210,19 @@ async function refreshDashboard() {
   // WO Type chart
   const types = {};
   workOrders.forEach(w => { types[w.incidentType] = (types[w.incidentType]||0) + 1; });
-  const maxType = Math.max(...Object.values(types), 1);
-  const colors = { Corrective:'var(--red)', Preventive:'var(--green)', Emergency:'var(--amber)', Inspection:'var(--blue)', Repair:'var(--red)', Installation:'var(--purple)', Upgrade:'var(--cyan)' };
-  document.getElementById('woTypeChart').innerHTML = Object.entries(types)
-    .sort((a,b) => b[1]-a[1])
-    .map(([k,v]) => `<div class="bar-chart-row">
-      <div class="bar-label">${esc(k)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxType)*100}%;background:${colors[k]||'var(--blue)'}"></div></div>
-      <div class="bar-count">${v}</div>
-    </div>`).join('');
+  $('woTypeChart').innerHTML = renderChart(types, { Corrective:'var(--red)', Preventive:'var(--green)', Emergency:'var(--amber)', Inspection:'var(--blue)', Repair:'var(--red)', Installation:'var(--purple)', Upgrade:'var(--cyan)' }, 'var(--blue)');
 
-  // Recent Activity — sort by most recent action date
-  const recent = [...workOrders].sort((a,b) => {
-    const dateA = a.workCompleted || a.workStarted || a.reportedDate;
-    const dateB = b.workCompleted || b.workStarted || b.reportedDate;
-    return new Date(dateB) - new Date(dateA);
-  }).slice(0,8);
-  document.getElementById('recentActivity').innerHTML = recent.map(w => {
-    const dotColor = w.status==='Closed' ? 'var(--green)' : w.status==='Pending' ? 'var(--amber)' : 'var(--red)';
-    const click = w.status!=='Closed' ? `onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"` : '';
-    const statusTag = w.status==='Closed'
-      ? '<span style="color:var(--green);font-size:11px;font-weight:600">✓ Completed</span>'
-      : w.status==='Pending'
-      ? '<span style="color:var(--amber);font-size:11px;font-weight:600">⏳ Pending follow-up</span>'
-      : '<span style="color:var(--red);font-size:11px;font-weight:600">↗ Open</span>';
-    const actDate = w.workCompleted || w.reportedDate;
-    return `<div class="activity-item" ${click}>
-      <div class="activity-dot" style="background:${dotColor}"></div>
-      <div>
-        <div class="activity-text"><strong>${esc(w.machineId)}</strong> — ${esc(w.notes.substring(0,55))}${w.notes.length>55?'…':''} ${statusTag}</div>
-        <div class="activity-time">${formatDate(actDate)} · ${w.assignedTech || 'Unassigned'}</div>
-      </div>
-    </div>`;
-  }).join('');
+  // Recent Activity — rendered from transaction log
+  renderActivityFeed();
 
   // Location chart
   const locs = {};
   machines.forEach(m => { locs[m.location] = (locs[m.location]||0) + 1; });
-  const maxLoc = Math.max(...Object.values(locs), 1);
-  document.getElementById('locationChart').innerHTML = Object.entries(locs)
-    .sort((a,b) => b[1]-a[1])
-    .map(([k,v]) => `<div class="bar-chart-row">
-      <div class="bar-label">${esc(k)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxLoc)*100}%;background:var(--cyan)"></div></div>
-      <div class="bar-count">${v}</div>
-    </div>`).join('');
+  $('locationChart').innerHTML = renderChart(locs, {}, 'var(--cyan)');
+  } finally {
+    _refreshing = false;
+    if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = '↻ Refresh'; }
+  }
 }
 
 // ===================================================================
@@ -2010,25 +2230,37 @@ async function refreshDashboard() {
 // ===================================================================
 let machineLocationFilter = 'all';
 
+function renderLocationFilters() {
+  const locs = getLocations();
+  $('locationFilters').innerHTML =
+    `<div class="filter-chip ${machineLocationFilter==='all'?'active':''}" data-loc="all" onclick="setMachineFilter(this)">All</div>` +
+    locs.map(l => `<div class="filter-chip ${machineLocationFilter===l?'active':''}" data-loc="${esc(l)}" onclick="setMachineFilter(this)">${esc(l)}</div>`).join('');
+}
+
+function setMachineFilter(el) {
+  machineLocationFilter = el.dataset.loc;
+  document.querySelectorAll('#locationFilters .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderMachineGrid();
+}
+
 function renderMachines() {
-  document.getElementById('machineCount').textContent = machines.length;
+  $('machineCount').textContent = machines.length;
+  renderLocationFilters();
+  renderMachineGrid();
+}
 
-  // Location filters
-  const locs = [...new Set(machines.map(m=>m.location))].sort();
-  document.getElementById('locationFilters').innerHTML =
-    `<div class="filter-chip ${machineLocationFilter==='all'?'active':''}" onclick="machineLocationFilter='all';renderMachines()">All</div>` +
-    locs.map(l => `<div class="filter-chip ${machineLocationFilter===l?'active':''}" onclick="machineLocationFilter='${l}';renderMachines()">${l}</div>`).join('');
-
-  const search = (document.getElementById('machineSearch').value||'').toLowerCase();
-  let filtered = machines.filter(m => {
+function renderMachineGrid() {
+  const search = ($('machineSearch').value||'').toLowerCase();
+  const filtered = machines.filter(m => {
     if (machineLocationFilter !== 'all' && m.location !== machineLocationFilter) return false;
-    if (search && !(m.id+m.name+m.type+m.manufacturer).toLowerCase().includes(search)) return false;
+    if (search && !([m.id, m.name, m.type, m.manufacturer].join(' ')).toLowerCase().includes(search)) return false;
     return true;
   });
 
-  document.getElementById('machinesGrid').innerHTML = filtered.map(m => {
+  $('machinesGrid').innerHTML = filtered.map(m => {
     const dts = daysUntilService(m);
-    const isOverdue = dts < 0;
+    const isOverdue = dts < 0 && dts !== -9999;
     const statusBadge = isOverdue ? '<span class="badge-status badge-overdue">⚠ OVERDUE</span>' :
       m.status.includes('Down') ? '<span class="badge-status badge-critical">'+m.status+'</span>' :
       '<span class="badge-status badge-operational">'+m.status+'</span>';
@@ -2052,22 +2284,22 @@ function renderMachines() {
 
 
 function openAddMachine() {
-  const sel = document.getElementById('amLocation');
-  sel.innerHTML = LOCATIONS.map(l => `<option>${l}</option>`).join('');
+  const sel = $('amLocation');
+  sel.innerHTML = getLocations().map(l => `<option>${esc(l)}</option>`).join('');
   openModal('addMachineModal');
 }
 
 async function addMachine() {
   const m = {
-    id: document.getElementById('amId').value.trim(),
-    name: document.getElementById('amName').value.trim(),
-    type: document.getElementById('amType').value.trim(),
-    location: document.getElementById('amLocation').value,
-    manufacturer: document.getElementById('amMfg').value.trim(),
-    model: document.getElementById('amModel').value.trim(),
-    serviceFreqDays: parseInt(document.getElementById('amFreq').value) || 30,
-    lastService: new Date().toISOString().split('T')[0],
-    status: document.getElementById('amStatus').value,
+    id: $val('amId'),
+    name: $val('amName'),
+    type: $val('amType'),
+    location: $val('amLocation'),
+    manufacturer: $val('amMfg'),
+    model: $val('amModel'),
+    serviceFreqDays: parseInt($val('amFreq')) || 30,
+    lastService: todayISO(),
+    status: $('amStatus').value,
     manualLink: '',
   };
   if (!m.id || !m.name) { toast('Machine ID and Name required','error'); return; }
@@ -2082,12 +2314,11 @@ function openMachineDetail(id) {
   const m = machines.find(x => x.id === id);
   if (!m) return;
   const dts = daysUntilService(m);
-  const isOverdue = dts < 0;
+  const isOverdue = dts < 0 && dts !== -9999;
   const mWOs = workOrders.filter(w => w.machineId === id).sort((a,b) => new Date(b.reportedDate)-new Date(a.reportedDate));
-  const woBadge = s => s==='Open'?'badge-open':s==='Pending'?'badge-pending':'badge-closed';
 
-  document.getElementById('machineModalTitle').innerHTML = `<span style="color:var(--amber)">${esc(m.id)}</span> — ${esc(m.name)}`;
-  document.getElementById('machineModalBody').innerHTML = `
+  $('machineModalTitle').innerHTML = `<span style="color:var(--amber)">${esc(m.id)}</span> — ${esc(m.name)}`;
+  $('machineModalBody').innerHTML = `
     <div class="detail-grid">
       ${detailCell('Type', esc(m.type))}
       ${detailCell('Location', esc(m.location))}
@@ -2095,24 +2326,16 @@ function openMachineDetail(id) {
       ${detailCell('Model', esc(m.model))}
       ${detailCell('Service Freq', m.serviceFreqDays + ' days')}
       ${detailCell('Last Service', formatDate(m.lastService))}
-      <div><span class="detail-label">Next Service</span><br><span class="detail-value${isOverdue?' style="color:var(--red)"':''}">${nextServiceDate(m)} ${isOverdue?'('+Math.abs(dts)+'d OVERDUE)':''}</span>
+      <div><span class="detail-label">Next Service</span><br><span class="detail-value" ${isOverdue?'style="color:var(--red)"':''}>${nextServiceDate(m)} ${isOverdue?'('+Math.abs(dts)+'d OVERDUE)':''}</span>
       ${m.nextServiceOverride ? `<br><span style="font-size:11px;color:var(--amber)">📅 Follow-up override: ${formatDate(m.nextServiceOverride)}</span>` : ''}
       ${m._followUpNotes ? `<br><span style="font-size:11px;color:var(--text-muted)">📌 ${m._followUpNotes}</span>` : ''}
       </div>
-      ${detailCell('Status', esc(m.status))}
+      ${detailCell('Status', esc(m.status) + (m.downSince ? ' <span style="font-size:11px;color:var(--red);display:block">🔻 Down since ' + formatDate(m.downSince) + ' (' + Math.max(1, Math.round((new Date() - new Date(m.downSince)) / 86400000)) + 'd)</span>' : ''))}
     </div>
     ${m.manualLink && /^https?:\/\//i.test(m.manualLink) ? `<a href="${esc(m.manualLink)}" target="_blank" rel="noopener" style="color:var(--amber);font-size:13px">📄 Manufacturer Manual →</a><br><br>` : ''}
     <div class="section-divider">
       <h4 class="section-heading">Service History (${mWOs.length} records)</h4>
-      ${mWOs.length ? `<table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Tech</th><th>Status</th><th>Notes</th></tr></thead><tbody>
-        ${mWOs.slice(0,10).map(w => `<tr ${w.status!=='Closed'?`onclick="closeModal('machineModal');openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
-          <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td>
-          <td>${esc(w.incidentType)}</td>
-          <td>${w.assignedTech || '<span style="color:var(--text-muted);font-style:italic">—</span>'}</td>
-          <td><span class="badge-status ${woBadge(w.status)}">${esc(w.status)}${w.status==='Open'?' ↗':''}</span></td>
-          <td class="cell-truncate">${esc(w.notes)}</td>
-        </tr>`).join('')}
-      </tbody></table>` : '<p style="color:var(--text-muted);font-size:13px">No service history recorded.</p>'}
+      ${renderServiceHistory(mWOs)}
     </div>
     <div style="margin-top:16px">
       <button class="btn btn-primary" onclick="closeModal('machineModal');prefillWO('${esc(m.id)}')">🚨 Report Issue</button>
@@ -2127,7 +2350,7 @@ function openMachineDetail(id) {
 let woFilterStatus = 'Active';
 
 function renderWorkOrders() {
-  const search = (document.getElementById('woSearch').value||'').toLowerCase();
+  const search = ($('woSearch').value||'').toLowerCase();
   let filtered = workOrders.filter(w => {
     if (woFilterStatus === 'Active' && w.status !== 'Open' && w.status !== 'Pending') return false;
     if (woFilterStatus === 'Open' && w.status !== 'Open') return false;
@@ -2153,8 +2376,8 @@ function renderWorkOrders() {
       <td style="color:${prioColor[w.priority]||'inherit'};font-weight:600;font-size:12px">${esc(w.priority)}</td>
       <td>${esc(w.category)}</td>
       <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td>
-      <td>${w.assignedTech || '<span style="color:var(--text-muted);font-style:italic">Unassigned</span>'}</td>
-      <td><span class="badge-status ${w.status==='Open'?'badge-open':w.status==='Pending'?'badge-pending':'badge-closed'}">${esc(w.status)}</span></td>
+      <td>${esc(w.assignedTech) || '<span style="color:var(--text-muted);font-style:italic">Unassigned</span>'}</td>
+      <td>${badgeStatus(w.status)}</td>
       <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.notes)}</td>
     </tr>`;
   }).join('');
@@ -2166,30 +2389,234 @@ function filterWO(status, el) {
   el.classList.add('active');
   renderWorkOrders();
 }
+// ===================================================================
+// MODE / LOGIN
+// ===================================================================
+function selectMode(mode) {
+  _loginMode = mode;
+  document.querySelectorAll('.mode-tile').forEach(t => t.classList.remove('selected'));
+  $('tile-' + mode).classList.add('selected');
+  $('loginPin').focus();
+  $('loginErr').textContent = '';
+}
+
+function doLogin() {
+  if (!_loginMode) { $('loginErr').textContent = 'Select a role first.'; return; }
+  const pin = $('loginPin').value;
+
+  let valid = false;
+  _loggedInTechName = null;
+
+  if (_loginMode === 'tech') {
+    // tech PINs are a map: PIN → name
+    const name = CONFIG.pins.tech[pin];
+    if (name) { valid = true; _loggedInTechName = name; }
+  } else {
+    valid = (pin === CONFIG.pins[_loginMode]);
+  }
+
+  if (!valid) {
+    $('loginErr').textContent = 'Incorrect code — try again.';
+    $('loginPin').value = '';
+    $('loginPin').focus();
+    return;
+  }
+  currentMode = _loginMode;
+  $('loginScreen').style.display = 'none';
+  applyMode();
+  refreshDashboard();
+}
+
+function doLogout() {
+  if (!confirm('Log out?')) return;
+  currentMode = null; _loginMode = null; _loggedInTechName = null;
+  $('loginPin').value = '';
+  $('loginErr').textContent = '';
+  document.querySelectorAll('.mode-tile').forEach(t => t.classList.remove('selected'));
+  $('loginScreen').style.display = 'flex';
+}
+
+function applyMode() {
+  const isAdmin = currentMode === 'admin';
+  // Show / hide admin-only nav
+  document.querySelectorAll('.admin-only-nav').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+  // Mode badge
+  const labels = { admin: '⚡ Admin', tech: '🔧 Tech', operator: '👷 Operator' };
+  const badge  = $('modeBadge');
+  badge.className = 'mode-badge ' + currentMode;
+  const techLabel = (currentMode === 'tech' && _loggedInTechName) ? `🔧 ${_loggedInTechName}` : labels[currentMode];
+  badge.innerHTML = techLabel + ' <span style="font-size:9px;opacity:.6">· log out</span>';
+  // Hide "Add Machine" button for non-admins
+  const addBtn = document.querySelector('#page-machines .page-header .btn-primary');
+  if (addBtn) addBtn.style.display = isAdmin ? '' : 'none';
+}
+
+// ===================================================================
+// MACHINE ID — BARCODE / TYPEAHEAD
+// ===================================================================
+let _msSel = -1; // highlighted suggestion index
+
 function openNewWorkOrder() {
-  document.getElementById('woModalTitle').textContent = 'Report Machine Issue';
-  const sel = document.getElementById('woMachineId');
-  sel.innerHTML = machines.map(m => `<option value="${esc(m.id)}">${esc(m.id)} — ${esc(m.name)}</option>`).join('');
-  autoFillMachine();
-  populateTechSelects();
+  $('woModalTitle').textContent = 'Report Machine Issue';
+  $('woMachineId').value = '';
+  $('woMachineName').value = '';
+  $('woReportedBy').value = '';
+  $('woMachineDown').checked = false;
+  $('woPriority').value = 'Medium';
+  hideWoSug();
   openModal('woModal');
+  setTimeout(() => $('woMachineId').focus(), 80);
+}
+
+function onMachineDownToggle() {
+  if ($('woMachineDown').checked) {
+    $('woPriority').value = 'Critical';
+  }
 }
 
 function prefillWO(machineId) {
   openNewWorkOrder();
-  document.getElementById('woMachineId').value = machineId;
-  autoFillMachine();
+  const m = machines.find(x => x.id === machineId);
+  if (m) confirmMachine(m);
 }
 
-function autoFillMachine() {
-  const id = document.getElementById('woMachineId').value;
-  const m = machines.find(x => x.id === id);
-  document.getElementById('woMachineName').value = m ? m.name : '';
+function machineInput() {
+  const raw   = $('woMachineId').value;
+  const clean = raw.trim().toUpperCase().replace(/\*/g, '');
+  $('woMachineName').value = '';
+  if (!clean) { hideWoSug(); return; }
+
+  // Exact ID match → auto-confirm (barcode scanner typically fires Enter too,
+  // but handle paste-without-Enter for USB wedge scanners)
+  const exact = machines.find(x => x.id.toUpperCase() === clean ||
+    x.id.toUpperCase().replace(/[()]/g, '') === clean);
+  if (exact) { confirmMachine(exact); return; }
+
+  const hits = machines.filter(x =>
+    x.id.toUpperCase().includes(clean) || x.name.toUpperCase().includes(clean)
+  ).slice(0, 12);
+  hits.length ? showWoSug(hits) : hideWoSug();
 }
 
-function populateTechSelects() {
-  const techHtml = operators.map(o => `<option value="${esc(o.name)}">${esc(o.name)}</option>`).join('');
-  document.getElementById('woReportedBy').innerHTML = techHtml;
+function machineKeydown(e) {
+  const box   = $('woMachineSuggestions');
+  const items = box.querySelectorAll('.ms-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _msSel = Math.min(_msSel + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('hi', i === _msSel));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _msSel = Math.max(_msSel - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('hi', i === _msSel));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (_msSel >= 0 && items[_msSel]) { items[_msSel].click(); return; }
+    // Barcode scanner — try exact match on current value
+    const clean = $('woMachineId').value.trim().toUpperCase().replace(/\*/g, '');
+    const m = machines.find(x => x.id.toUpperCase() === clean ||
+      x.id.toUpperCase().replace(/[()]/g, '') === clean);
+    if (m) confirmMachine(m);
+  } else if (e.key === 'Escape') {
+    hideWoSug();
+  }
+}
+
+function showWoSug(hits) {
+  _msSel = -1;
+  const box = $('woMachineSuggestions');
+  box.innerHTML = hits.map(m =>
+    `<div class="ms-item" data-machine-id="${esc(m.id)}">
+      <span class="ms-id">${esc(m.id)}</span>
+      <span class="ms-name">${esc(m.name)}</span>
+    </div>`
+  ).join('');
+  box.style.display = 'block';
+}
+
+// Use event delegation — avoids inline onclick with string interpolation
+$('woMachineSuggestions').addEventListener('click', function(e) {
+  const item = e.target.closest('.ms-item[data-machine-id]');
+  if (!item) return;
+  const m = machines.find(x => x.id === item.dataset.machineId);
+  if (m) confirmMachine(m);
+});
+
+function hideWoSug() {
+  $('woMachineSuggestions').style.display = 'none';
+  _msSel = -1;
+}
+
+function confirmMachine(m) {
+  if (!m) return;
+  $('woMachineId').value  = m.id;
+  $('woMachineName').value = m.name;
+  // Pre-check "machine down" if machine is already in a down state
+  if (m.status === 'Down - Critical' || m.status === 'Down - Non-Critical') {
+    $('woMachineDown').checked = true;
+    $('woPriority').value = 'Critical';
+  }
+  hideWoSug();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.machine-id-wrap')) { hideWoSug(); hideTechSug(); }
+});
+
+// ===================================================================
+// TECH AUTOCOMPLETE (Assign Tech in resolve modal)
+// ===================================================================
+let _tsSel = -1;
+
+function techInput() {
+  const val = $('resolveAssignTech').value.trim().toLowerCase();
+  if (!val) { hideTechSug(); return; }
+  const hits = operators.filter(o => o.name.toLowerCase().includes(val)).slice(0, 8);
+  hits.length ? showTechSug(hits) : hideTechSug();
+}
+
+function techKeydown(e) {
+  const box   = $('techSuggestions');
+  const items = box.querySelectorAll('.ms-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _tsSel = Math.min(_tsSel + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('hi', i === _tsSel));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _tsSel = Math.max(_tsSel - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('hi', i === _tsSel));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (_tsSel >= 0 && items[_tsSel]) items[_tsSel].click();
+  } else if (e.key === 'Escape') {
+    hideTechSug();
+  }
+}
+
+function showTechSug(hits) {
+  _tsSel = -1;
+  const box = $('techSuggestions');
+  box.innerHTML = hits.map(o =>
+    `<div class="ms-item" onclick="confirmTech('${esc(o.name).replace(/'/g,"\\'")}')">
+      <span class="ms-id">${esc(o.name)}</span>
+      <span class="ms-name">${esc(o.role || '')}</span>
+    </div>`
+  ).join('');
+  box.style.display = 'block';
+}
+
+function hideTechSug() {
+  const box = $('techSuggestions');
+  if (box) box.style.display = 'none';
+  _tsSel = -1;
+}
+
+function confirmTech(name) {
+  $('resolveAssignTech').value = name;
+  hideTechSug();
 }
 
 // ===================================================================
@@ -2200,33 +2627,44 @@ let currentResolveWOId = null;
 function openResolveWO(woId) {
   const w = workOrders.find(x => x.id === woId);
   if (!w) return;
+
+  // OPERATOR: read-only view only — no form access
+  // TECH: can only manage WOs assigned to them
+  if (currentMode === 'operator') {
+    toast('Operators can view work orders but cannot manage them', 'warning');
+    return;
+  }
+  if (currentMode === 'tech' && w.assignedTech && w.assignedTech !== _currentTechName()) {
+    toast('You can only manage work orders assigned to you', 'warning');
+    return;
+  }
+
   currentResolveWOId = woId;
 
   const m = machines.find(x => x.id === w.machineId);
   const dts = m ? daysUntilService(m) : null;
-  const isOverdue = dts !== null && dts < 0;
+  const isOverdue = dts !== null && dts < 0 && dts !== -9999;
 
-  document.getElementById('resolveWoTitle').innerHTML = `<span style="color:var(--amber)">${esc(w.id)}</span> — ${esc(w.machineId)}`;
+  $('resolveWoTitle').innerHTML = `<span style="color:var(--amber)">${esc(w.id)}</span> — ${esc(w.machineId)}`;
 
   const isPM = w._isPM;
   const descLabel = isPM ? 'System PM Notice' : "Operator's Description";
   const descBorderColor = isPM ? 'var(--blue)' : 'var(--amber)';
 
-  // Info section
-  document.getElementById('resolveWoInfo').innerHTML = `
+  $('resolveWoInfo').innerHTML = `
     ${isPM ? '<div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">🔄</span><span style="font-size:13px;color:var(--blue);font-weight:600">Auto-Generated PM Work Order</span><span style="font-size:12px;color:var(--text-muted);margin-left:auto">Assign a tech to get this done</span></div>' : ''}
     <div style="background:var(--bg-tertiary);border-radius:var(--radius);padding:14px 16px;margin-bottom:4px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div><span class="detail-label-sm">Machine</span><br>
           <span style="font-family:var(--font-mono);color:var(--amber);font-weight:600">${esc(w.machineId)}</span> — ${esc(w.machineName)}</div>
-        <div><span class="detail-label-sm">Location</span><br>${m ? m.location : '—'}</div>
+        <div><span class="detail-label-sm">Location</span><br>${m ? esc(m.location) : '—'}</div>
         <div><span class="detail-label-sm">${isPM ? 'Generated' : 'Reported By'}</span><br>${esc(w.reportedBy)}</div>
         <div><span class="detail-label-sm">Date</span><br>${formatDate(w.reportedDate)}</div>
         <div><span class="detail-label-sm">Type</span><br>${esc(w.incidentType)}</div>
         <div><span class="detail-label-sm">Category</span><br>${esc(w.category)}</div>
         ${w.workStarted || w.workCompleted ? `
         <div><span class="detail-label-sm">Work Started</span><br>${w.workStarted ? formatDate(w.workStarted) : '<span style="color:var(--text-muted)">—</span>'}</div>
-        <div><span class="detail-label-sm">${w.workCompleted ? 'Completed' : 'Turnaround'}</span><br>${w.workCompleted ? formatDate(w.workCompleted) + (w.workStarted ? ' <span style="font-size:11px;color:var(--green);font-family:var(--font-mono)">(' + Math.max(1, Math.round((new Date(w.workCompleted) - new Date(w.workStarted)) / 86400000)) + 'd)</span>' : '') : (w.workStarted ? '<span style="font-family:var(--font-mono);color:var(--amber)">' + Math.max(1, Math.round((new Date() - new Date(w.workStarted)) / 86400000)) + 'd in progress</span>' : '—')}</div>
+        <div><span class="detail-label-sm">${w.workCompleted ? 'Completed' : 'Turnaround'}</span><br>${w.workCompleted ? formatDate(w.workCompleted) + (w.workStarted ? ' <span style="font-size:11px;color:var(--green);font-family:var(--font-mono)">(' + Math.max(1, Math.round((parseLocalDate(w.workCompleted) - parseLocalDate(w.workStarted)) / 86400000)) + 'd)</span>' : '') : (w.workStarted ? '<span style="font-family:var(--font-mono);color:var(--amber)">' + Math.max(1, Math.round((new Date() - parseLocalDate(w.workStarted)) / 86400000)) + 'd in progress</span>' : '—')}</div>
         ` : ''}
       </div>
       <div><span class="detail-label-sm">${descLabel}</span>
@@ -2236,153 +2674,235 @@ function openResolveWO(woId) {
         <p style="margin-top:4px;font-size:13px;color:var(--text-secondary);line-height:1.4;background:var(--bg-card);padding:10px 12px;border-radius:var(--radius);border-left:3px solid var(--green)">${esc(w.resolutionNotes)}</p>
       </div>` : ''}
       <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <span class="badge-status ${w.status==='Open'?'badge-open':w.status==='Pending'?'badge-pending':'badge-closed'}">${esc(w.status)}</span>
+        ${badgeStatus(w.status)}
         ${w.assignedTech ? `<span style="font-size:12px;color:var(--text-secondary)">Assigned: <strong>${esc(w.assignedTech)}</strong></span>` : '<span style="font-size:12px;color:var(--text-muted);font-style:italic">⚠ No tech assigned yet</span>'}
         ${isOverdue ? `<span class="badge-status badge-overdue">Machine ${Math.abs(dts)}d OVERDUE</span>` : ''}
+        ${w.machineDown ? '<span style="font-size:12px;color:var(--red);font-weight:600">🔻 Reported DOWN by operator</span>' : ''}
+        ${m && m.downSince ? `<span style="font-size:11px;color:var(--red);font-family:var(--font-mono)">Down ${Math.max(1, Math.round((new Date() - new Date(m.downSince)) / 86400000))}d</span>` : ''}
         ${w.followUp==='Yes' && w.followUpDate ? `<span style="font-size:12px;color:var(--amber);font-family:var(--font-mono)">📅 Follow-up: ${formatDate(w.followUpDate)}</span>` : ''}
       </div>
       ${w.followUpNotes ? `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);padding:6px 10px;background:var(--bg-card);border-radius:var(--radius);border-left:2px solid var(--amber)">📌 ${esc(w.followUpNotes)}</div>` : ''}
     </div>
   `;
 
-  // Pre-fill form fields with current values
-  const techSelect = document.getElementById('resolveAssignTech');
-  techSelect.innerHTML = '<option value="">— Select Tech —</option>' + operators.map(o => `<option value="${esc(o.name)}" ${w.assignedTech===o.name?'selected':''}>${esc(o.name)}</option>`).join('');
-  document.getElementById('resolvePriority').value = w.priority || 'Medium';
-  document.getElementById('resolveStatus').value = w.status || 'Open';
-  document.getElementById('resolveNotes').value = w.resolutionNotes || '';
-  document.getElementById('resolvePartsUsed').value = w.partsUsed || '';
-  document.getElementById('resolvePartsCost').value = w.partsCost || '';
-  document.getElementById('resolveWorkStarted').value = w.workStarted ? w.workStarted + (w.workStarted.includes('T') ? '' : 'T08:00') : '';
-  document.getElementById('resolveFollowUp').value = w.followUp || 'No';
+  // ── Assign Tech field: locked once a tech is set ──
+  const techInput  = $('resolveAssignTech');
+  const techWrap   = techInput.closest('.form-group');
+  hideTechSug();
 
-  // Handle follow-up date section
-  const fuSection = document.getElementById('followUpDateSection');
+  if (w.assignedTech) {
+    // Already assigned — show locked display, hide input
+    techInput.style.display = 'none';
+    let locked = techWrap.querySelector('.field-locked');
+    if (!locked) {
+      locked = document.createElement('div');
+      locked.className = 'field-locked';
+      techWrap.appendChild(locked);
+    }
+    locked.innerHTML = `<span class="lock-icon">🔒</span> ${esc(w.assignedTech)}`;
+    locked.style.display = 'flex';
+  } else {
+    // Unassigned — show input for admin or tech self-assign
+    techInput.style.display = '';
+    techInput.value = '';
+    techInput.placeholder = currentMode === 'tech'
+      ? 'Type your name to self-assign…'
+      : 'Type name or scan tech ID…';
+    const locked = techWrap.querySelector('.field-locked');
+    if (locked) locked.style.display = 'none';
+  }
+
+  // ── Tech mode: hide assign-tech row entirely (they handle their own) ──
+  // (already handled above — tech sees input to self-assign when unassigned)
+
+  $('resolvePriority').value = w.priority || 'Medium';
+  $('resolveStatus').value   = w.status || 'Open';
+  $('resolveNotes').value    = w.resolutionNotes || '';
+  $('resolvePartsUsed').value = w.partsUsed || '';
+  $('resolveWorkStarted').value = w.workStarted ? w.workStarted + (w.workStarted.includes('T') ? '' : 'T08:00') : '';
+  $('resolveFollowUp').value = w.followUp || 'No';
+
+  const fuSection = $('followUpDateSection');
   if (w.followUp === 'Yes') {
     fuSection.style.display = 'block';
-    document.getElementById('resolveFollowUpDate').value = w.followUpDate || '';
-    document.getElementById('resolveFollowUpNotes').value = w.followUpNotes || '';
+    $('resolveFollowUpDate').value  = w.followUpDate || '';
+    $('resolveFollowUpNotes').value = w.followUpNotes || '';
   } else {
     fuSection.style.display = 'none';
-    document.getElementById('resolveFollowUpDate').value = '';
-    document.getElementById('resolveFollowUpNotes').value = '';
+    $('resolveFollowUpDate').value  = '';
+    $('resolveFollowUpNotes').value = '';
   }
 
   openModal('resolveWoModal');
 }
 
 async function resolveWorkOrder() {
+  const btn = $('btnResolveWO');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  try {
   const w = workOrders.find(x => x.id === currentResolveWOId);
   if (!w) return;
+  const oldStatus = w.status;
+  const oldTech = w.assignedTech;
 
-  let newStatus = document.getElementById('resolveStatus').value;
-  const assignedTech = document.getElementById('resolveAssignTech').value;
-  const resNotes = document.getElementById('resolveNotes').value.trim();
-  const followUp = document.getElementById('resolveFollowUp').value;
-  const followUpDate = document.getElementById('resolveFollowUpDate').value;
-  const followUpNotes = document.getElementById('resolveFollowUpNotes').value.trim();
+  let newStatus = $val('resolveStatus');
+  // Read assignedTech: if field is locked (already had a tech), keep existing value
+  const techField  = $('resolveAssignTech');
+  const assignedTech = techField.style.display === 'none'
+    ? w.assignedTech       // locked — preserve existing
+    : techField.value.trim(); // free-text input
+  const resNotes     = $val('resolveNotes');
+  const followUp     = $val('resolveFollowUp');
+  const followUpDate = $val('resolveFollowUpDate');
+  const followUpNotes = $val('resolveFollowUpNotes');
+  const newPriority  = $val('resolvePriority');
+  const newPartsUsed = $val('resolvePartsUsed');
+  const newWorkStarted = $val('resolveWorkStarted') || w.workStarted || '';
+
+  // Tech mode: can only close WOs assigned to them; cannot set status to something else
+  if (currentMode === 'tech') {
+    const myName = _currentTechName();
+    if (assignedTech && assignedTech !== myName && !w.assignedTech) {
+      // tech is self-assigning — ok
+    } else if (w.assignedTech && w.assignedTech !== myName) {
+      toast('You can only manage work orders assigned to you', 'warning');
+      return;
+    }
+  }
 
   // Force Pending when follow-up is scheduled
   if (followUp === 'Yes' && followUpDate) {
     newStatus = 'Pending';
   }
 
-  // Track Work_Started: first time a tech is assigned = work begins
-  if (assignedTech && !w.assignedTech && !w.workStarted) {
-    w.workStarted = new Date().toISOString().split('T')[0];
+  // Compute workStarted: first tech assignment = work begins
+  let computedWorkStarted = newWorkStarted;
+  if (assignedTech && !w.assignedTech && !computedWorkStarted) {
+    computedWorkStarted = todayISO();
   }
+
+  // Compute workCompleted
+  let computedWorkCompleted = w.workCompleted || '';
+  if (newStatus === 'Closed') {
+    computedWorkCompleted = todayISO();
+    if (!computedWorkStarted) computedWorkStarted = computedWorkCompleted;
+  }
+
+  const m = machines.find(x => x.id === w.machineId);
+
+  // --- AIRTABLE WRITES FIRST (before any local mutation) ---
+  if (CONFIG.useAirtable && w._airtableId) {
+    try {
+      const updateFields = {
+        'Assigned_Tech': assignedTech,
+        'Priority': newPriority,
+        'Status': newStatus,
+        'Resolution_Notes': resNotes,
+        'Parts_Used': newPartsUsed,
+        'Follow_Up': followUp,
+        'Follow_Up_Date': followUpDate || null,
+        'Follow_Up_Notes': followUpNotes || '',
+      };
+      if (computedWorkStarted) updateFields['Work_Started'] = computedWorkStarted;
+      if (computedWorkCompleted) updateFields['Work_Completed'] = computedWorkCompleted;
+      await AirtableAPI.updateRecord(CONFIG.airtable.tables.serviceLog, w._airtableId, updateFields);
+    } catch(e) {
+      toast('Save failed — no changes made: ' + e.message, 'error');
+      return; // abort, don't close modal, don't mutate
+    }
+
+    // Machine updates in Airtable
+    if (newStatus === 'Pending' && followUp === 'Yes' && followUpDate && m && m._airtableId) {
+      try {
+        await AirtableAPI.updateRecord(CONFIG.airtable.tables.machines, m._airtableId, {
+          'Next_Service_Override': followUpDate, 'Override_Notes': followUpNotes,
+        });
+      } catch(e) { toast('Machine override NOT saved to Airtable: ' + e.message, 'error'); }
+    } else if (newStatus === 'Closed' && m && m._airtableId) {
+      const remainingActive = workOrders.filter(x =>
+        x.machineId === m.id && (x.status === 'Open' || x.status === 'Pending') && x.id !== w.id
+      );
+      const machineFields = {
+        'Last_Service': computedWorkCompleted || computedWorkStarted,
+        'Next_Service_Override': null, 'Override_Notes': '',
+      };
+      if (remainingActive.length === 0 && (m.status === 'Down - Critical' || m.status === 'Down - Non-Critical')) {
+        machineFields['Status'] = 'Operational';
+        machineFields['Down_Since'] = null;
+      }
+      try {
+        await AirtableAPI.updateRecord(CONFIG.airtable.tables.machines, m._airtableId, machineFields);
+      } catch(e) { toast('Machine update NOT saved to Airtable: ' + e.message, 'error'); }
+    }
+  }
+
+  // --- NOW MUTATE LOCAL STATE (Airtable succeeded or not in Airtable mode) ---
   w.assignedTech = assignedTech;
-  w.priority = document.getElementById('resolvePriority').value;
+  w.priority = newPriority;
   w.status = newStatus;
   w.resolutionNotes = resNotes;
-  w.partsUsed = document.getElementById('resolvePartsUsed').value.trim();
-  w.partsCost = parseFloat(document.getElementById('resolvePartsCost').value) || 0;
-  if (document.getElementById('resolveWorkStarted').value) {
-    w.workStarted = document.getElementById('resolveWorkStarted').value;
-  }
+  w.partsUsed = newPartsUsed;
+  w.workStarted = computedWorkStarted;
+  w.workCompleted = computedWorkCompleted;
   w.followUp = followUp;
   w.followUpDate = followUpDate || '';
   w.followUpNotes = followUpNotes;
 
-  const m = machines.find(x => x.id === w.machineId);
-
-  if (newStatus === 'Pending' && followUp === 'Yes' && followUpDate && m) {
-    // Set override on machine — no longer hacks lastService
-    m.nextServiceOverride = followUpDate;
-    m._followUpNotes = followUpNotes;
-    await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, {
-      'Next_Service_Override': followUpDate,
-      'Override_Notes': followUpNotes,
-    }, 'Machine override NOT saved to Airtable');
-  } else if (newStatus === 'Closed') {
-    // Normal close — update last service to today and clear any override
-    if (m) {
-      m.lastService = new Date().toISOString().split('T')[0];
+  if (m) {
+    if (newStatus === 'Pending' && followUp === 'Yes' && followUpDate) {
+      m.nextServiceOverride = followUpDate;
+      m._followUpNotes = followUpNotes;
+    } else if (newStatus === 'Closed') {
+      m.lastService = computedWorkCompleted || computedWorkStarted;
       m.nextServiceOverride = '';
       m._followUpNotes = '';
-
-      // Check if any OTHER active WOs remain for this machine
       const remainingActive = workOrders.filter(x =>
         x.machineId === m.id && (x.status === 'Open' || x.status === 'Pending') && x.id !== w.id
       );
-      if (remainingActive.length === 0) {
+      if (remainingActive.length === 0 && (m.status === 'Down - Critical' || m.status === 'Down - Non-Critical')) {
         m.status = 'Operational';
+        m.downSince = '';
       }
-
-      await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, {
-        'Last_Service': m.lastService,
-        'Next_Service_Override': null,
-        'Override_Notes': '',
-        'Status': m.status,
-      }, 'Machine update NOT saved to Airtable');
     }
   }
 
-  if (newStatus === 'Closed') {
-    w.workCompleted = new Date().toISOString().split('T')[0];
-    if (!w.workStarted) w.workStarted = w.workCompleted;
-  }
-
-  // Push WO update to Airtable
-  if (CONFIG.useAirtable && w._airtableId) {
-    try {
-      const updateFields = {
-        'Assigned_Tech': w.assignedTech,
-        'Priority': w.priority,
-        'Status': w.status,
-        'Parts_Cost': w.partsCost,
-        'Resolution_Notes': w.resolutionNotes,
-        'Parts_Used': w.partsUsed,
-        'Follow_Up': w.followUp,
-        'Follow_Up_Date': w.followUpDate || null,
-        'Follow_Up_Notes': w.followUpNotes || '',
-      };
-      if (w.workStarted) updateFields['Work_Started'] = w.workStarted;
-      if (w.workCompleted) updateFields['Work_Completed'] = w.workCompleted;
-      await AirtableAPI.updateRecord(CONFIG.airtable.tables.serviceLog, w._airtableId, updateFields);
-    } catch(e) { toast('Airtable update failed: ' + e.message, 'error'); }
-  }
-
   closeModal('resolveWoModal');
-  LocalStore.save();
   renderWorkOrders();
 
   if (newStatus === 'Pending' && followUp === 'Yes' && followUpDate) {
     toast(`${esc(w.id)} — follow-up scheduled for ${formatDate(followUpDate)}. Status set to Pending.`, 'warning');
+    logActivity('pending', w.id, w.machineId, `Follow-up scheduled ${formatDate(followUpDate)}${assignedTech ? ' · ' + assignedTech : ''}`);
   } else if (newStatus === 'Closed') {
     toast(`${esc(w.id)} resolved and closed${assignedTech ? ' by ' + assignedTech : ''}`);
+    logActivity('closed', w.id, w.machineId, `Closed${assignedTech ? ' by ' + assignedTech : ''}${w.workStarted ? ' (' + Math.max(1, Math.round((parseLocalDate(w.workCompleted) - parseLocalDate(w.workStarted)) / 86400000)) + 'd turnaround)' : ''}`);
   } else {
     toast(`${esc(w.id)} updated`);
+    // Log tech assignment as distinct event
+    if (assignedTech && !oldTech) {
+      logActivity('assigned', w.id, w.machineId, `Tech assigned: ${assignedTech}`);
+    } else {
+      logActivity('updated', w.id, w.machineId, `Updated${assignedTech ? ' · ' + assignedTech : ''}`);
+    }
   }
+
+  LocalStore.save(); // Save after logActivity so activity entries are persisted
 
   // Update badge count (Open + Pending)
   const activeCount = workOrders.filter(x => x.status === 'Open' || x.status === 'Pending').length;
-  document.getElementById('openWoBadge').textContent = activeCount;
+  $('openWoBadge').textContent = activeCount;
+
+  // If user resolved from dashboard (clicked activity item), refresh KPIs/overdue table
+  if ($('page-dashboard').classList.contains('active')) {
+    _refreshing = false; // allow re-render
+    refreshDashboard();
+  }
+  } finally { btn.disabled = false; }
 }
 
 function toggleFollowUpDate() {
-  const val = document.getElementById('resolveFollowUp').value;
-  const section = document.getElementById('followUpDateSection');
+  const val = $('resolveFollowUp').value;
+  const section = $('followUpDateSection');
   section.style.display = val === 'Yes' ? 'block' : 'none';
   if (val === 'Yes') {
     // Default to machine's current service freq from today
@@ -2391,7 +2911,7 @@ function toggleFollowUpDate() {
       const m = machines.find(x => x.id === w.machineId);
       if (m) {
         const defaultDate = new Date(Date.now() + m.serviceFreqDays * 86400000);
-        document.getElementById('resolveFollowUpDate').value = defaultDate.toISOString().split('T')[0];
+        $('resolveFollowUpDate').value = defaultDate.toISOString().split('T')[0];
       }
     }
   }
@@ -2399,80 +2919,106 @@ function toggleFollowUpDate() {
 
 function setFollowUpDays(days) {
   const d = new Date(Date.now() + days * 86400000);
-  document.getElementById('resolveFollowUpDate').value = d.toISOString().split('T')[0];
+  $('resolveFollowUpDate').value = d.toISOString().split('T')[0];
 }
 
 async function submitWorkOrder() {
+  const btn = $('btnSubmitWO');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  try {
   const wo = {
     id: uid(),
-    machineId: document.getElementById('woMachineId').value,
-    machineName: document.getElementById('woMachineName').value,
-    incidentType: document.getElementById('woIncidentType').value,
-    priority: document.getElementById('woPriority').value,
-    category: document.getElementById('woCategory').value,
-    reportedBy: document.getElementById('woReportedBy').value,
-    reportedDate: new Date().toISOString().split('T')[0],
+    machineId: $val('woMachineId'),
+    machineName: $val('woMachineName'),
+    incidentType: $val('woIncidentType'),
+    priority: $val('woPriority'),
+    category: $val('woCategory'),
+    reportedBy: $val('woReportedBy'),
+    reportedDate: todayISO(),
     assignedTech: '',
     status: 'Open',
-    notes: document.getElementById('woNotes').value,
+    notes: $val('woNotes'),
+    machineDown: $('woMachineDown').checked,
     laborCost: 0,
     partsCost: 0,
     partsUsed: '',
     followUp: 'No',
+    followUpDate: '',
+    followUpNotes: '',
     resolutionNotes: '',
+    workStarted: '',
+    workCompleted: '',
   };
-  if (!wo.machineId) { toast('Select a machine','error'); return; }
+  if (!wo.machineId) { toast('Scan or type a Machine ID first', 'error'); return; }
   if (!wo.notes.trim()) { toast('Describe the problem so we can start diagnosing','warning'); return; }
   const ok = await DataService.addWorkOrder(wo);
   if (ok === false) return; // Airtable write failed — don't close modal
 
-  // Update machine status when reporting a Repair or Emergency issue
-  if (wo.incidentType === 'Emergency' || wo.incidentType === 'Repair') {
+  // Update machine status: operator marked down OR Emergency/Repair auto-down
+  const shouldMarkDown = wo.machineDown || wo.incidentType === 'Emergency' || wo.incidentType === 'Repair';
+  if (shouldMarkDown) {
     const m = machines.find(x => x.id === wo.machineId);
-    if (m && m.status === 'Operational') {
-      m.status = wo.incidentType === 'Emergency' ? 'Down - Critical' : 'Down - Non-Critical';
+    if (m && m.status !== 'Down - Critical') {
+      const newMachineStatus = (wo.machineDown || wo.incidentType === 'Emergency') ? 'Down - Critical' : 'Down - Non-Critical';
+      const machineFields = { 'Status': newMachineStatus, 'Down_Since': new Date().toISOString() };
+      await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, machineFields, 'Machine status NOT updated in Airtable');
+      m.status = newMachineStatus;
+      m.downSince = machineFields['Down_Since'];
       LocalStore.save();
-      await syncAirtable(CONFIG.airtable.tables.machines, m._airtableId, { 'Status': m.status }, 'Machine status NOT updated in Airtable');
     }
   }
 
   closeModal('woModal');
   renderWorkOrders();
+  $('openWoBadge').textContent = workOrders.filter(x => x.status === 'Open' || x.status === 'Pending').length;
   toast('Work order submitted: ' + wo.id + ' — management will assign a tech');
-  document.getElementById('woNotes').value = '';
+  logActivity('created', wo.id, wo.machineId, `${wo.incidentType} — ${wo.notes.substring(0, 60)}${wo.notes.length > 60 ? '…' : ''}`);
+  LocalStore.save(); // Persist activity log entry
+  $('woNotes').value = '';
+  } finally { btn.disabled = false; }
 }
 
 // ===================================================================
 // SCAN
 // ===================================================================
+// Auto-submit after 300ms of no input — handles scanners that don't send Enter
+let _scanTimer = null;
+function scheduleScan() {
+  clearTimeout(_scanTimer);
+  const val = $('scanInput').value.trim();
+  if (val.length < 3) return; // don't fire on partial typing
+  _scanTimer = setTimeout(scanMachine, 300);
+}
+
 function scanMachine() {
-  const input = document.getElementById('scanInput').value.trim().toUpperCase();
+  clearTimeout(_scanTimer);
+  const input = $('scanInput').value.trim().toUpperCase();
   if (!input) return;
   // strip asterisks from barcode scan
   const clean = input.replace(/\*/g, '');
   const m = machines.find(x => x.id.toUpperCase() === clean || x.id.toUpperCase().replace(/[()]/g,'') === clean);
-  const resultDiv = document.getElementById('scanResult');
+  const resultDiv = $('scanResult');
 
   if (!m) {
     resultDiv.innerHTML = `<div class="panel" style="border-left:3px solid var(--red)">
       <div class="panel-body"><p style="color:var(--red);font-weight:600">No machine found for ID: ${esc(clean)}</p><p style="color:var(--text-muted);font-size:13px;margin-top:4px">Check the ID and try again, or add a new machine from the Machines page.</p></div>
     </div>`;
     // Refocus for next scan
-    const si = document.getElementById('scanInput');
+    const si = $('scanInput');
     si.value = ''; si.focus(); si.select();
     return;
   }
 
   const dts = daysUntilService(m);
-  const isOverdue = dts < 0;
+  const isOverdue = dts < 0 && dts !== -9999;
   const mWOs = workOrders.filter(w => w.machineId === m.id).sort((a,b) => new Date(b.reportedDate)-new Date(a.reportedDate)).slice(0,5);
-  const woBadge = s => s==='Open'?'badge-open':s==='Pending'?'badge-pending':'badge-closed';
 
   resultDiv.innerHTML = `
     <div class="panel" style="border-left:3px solid var(--amber)">
       <div class="panel-header">
         <h3><span style="color:var(--amber)">${esc(m.id)}</span> — ${esc(m.name)}</h3>
-        ${isOverdue ? '<span class="badge-status badge-overdue">⚠ OVERDUE '+Math.abs(dts)+'d</span>' : '<span class="badge-status badge-operational">'+m.status+'</span>'}
+        ${machineBadge(m, dts)}
       </div>
       <div class="panel-body">
         <div class="detail-grid-auto">
@@ -2484,12 +3030,7 @@ function scanMachine() {
           <div><span class="detail-label-sm">Next Service</span><br><span ${isOverdue?'style="color:var(--red)"':''}>${nextServiceDate(m)}</span></div>
         </div>
         ${mWOs.length ? `<h4 class="section-heading" style="font-size:11px;margin-bottom:8px">Recent Service History</h4>
-        <table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Tech</th><th>Status</th><th>Notes</th></tr></thead><tbody>
-        ${mWOs.map(w => `<tr ${w.status!=='Closed'?`onclick="openResolveWO('${esc(w.id)}')" style="cursor:pointer"`:''}>
-          <td style="white-space:nowrap">${formatDate(w.reportedDate)}</td><td>${esc(w.incidentType)}</td><td>${w.assignedTech || '<span style="color:var(--text-muted)">—</span>'}</td>
-          <td><span class="badge-status ${woBadge(w.status)}">${esc(w.status)}${w.status==='Open'?' ↗':''}</span></td>
-          <td class="cell-truncate">${esc(w.notes)}</td></tr>`).join('')}
-        </tbody></table>` : ''}
+        ${renderServiceHistory(mWOs)}` : ''}
         <div style="margin-top:16px;display:flex;gap:10px">
           <button class="btn btn-primary" onclick="prefillWO('${esc(m.id)}')">🚨 Report Issue</button>
           <button class="btn btn-secondary" onclick="openMachineDetail('${esc(m.id)}')">Full Details</button>
@@ -2498,7 +3039,7 @@ function scanMachine() {
     </div>`;
 
   // Refocus for next scan
-  const si = document.getElementById('scanInput');
+  const si = $('scanInput');
   si.value = ''; si.focus(); si.select();
 }
 
@@ -2521,25 +3062,25 @@ function renderOperators() {
 function openAddOperator() { openModal('addOperatorModal'); }
 
 async function addOperator() {
-  const name = document.getElementById('aoName').value.trim();
+  const name = $val('aoName');
   if (!name) { toast('Name required','error'); return; }
-  const op = { id: 'op-'+Date.now(), name, role: document.getElementById('aoRole').value, active: true };
+  const op = { id: 'op-'+Date.now(), name, role: $('aoRole').value, active: true };
   await DataService.addOperator(op);
   closeModal('addOperatorModal');
   renderOperators();
   toast('Operator added: ' + name);
-  document.getElementById('aoName').value = '';
+  $('aoName').value = '';
 }
 
 // ===================================================================
 // SETTINGS
 // ===================================================================
 function saveSettings() {
-  CONFIG.airtable.apiKey = document.getElementById('atApiKey').value.trim();
-  CONFIG.airtable.baseId = document.getElementById('atBaseId').value.trim();
-  CONFIG.airtable.tables.machines = document.getElementById('atMachinesTable').value.trim();
-  CONFIG.airtable.tables.serviceLog = document.getElementById('atServiceTable').value.trim();
-  CONFIG.airtable.tables.operators = document.getElementById('atOperatorsTable').value.trim();
+  CONFIG.airtable.apiKey = $('atApiKey').value.trim();
+  CONFIG.airtable.baseId = $('atBaseId').value.trim();
+  CONFIG.airtable.tables.machines = $('atMachinesTable').value.trim();
+  CONFIG.airtable.tables.serviceLog = $('atServiceTable').value.trim();
+  CONFIG.airtable.tables.operators = $('atOperatorsTable').value.trim();
   CONFIG.useAirtable = !!CONFIG.airtable.apiKey && !!CONFIG.airtable.baseId;
 
   localStorage.setItem('maint_settings', JSON.stringify(CONFIG.airtable));
@@ -2552,17 +3093,17 @@ function saveSettings() {
 }
 
 async function testConnection() {
-  CONFIG.airtable.apiKey = document.getElementById('atApiKey').value.trim();
-  CONFIG.airtable.baseId = document.getElementById('atBaseId').value.trim();
+  CONFIG.airtable.apiKey = $('atApiKey').value.trim();
+  CONFIG.airtable.baseId = $('atBaseId').value.trim();
   if (!CONFIG.airtable.apiKey || !CONFIG.airtable.baseId) { toast('Enter API key and Base ID first','error'); return; }
-  document.getElementById('connStatus').textContent = 'Testing connection...';
+  $('connStatus').textContent = 'Testing connection...';
   try {
     const ok = await AirtableAPI.testConnection();
-    document.getElementById('connStatus').innerHTML = ok
+    $('connStatus').innerHTML = ok
       ? '<span style="color:var(--green)">✓ Connection successful</span>'
       : '<span style="color:var(--red)">✗ Connection failed — check credentials</span>';
   } catch(e) {
-    document.getElementById('connStatus').innerHTML = `<span style="color:var(--red)">✗ ${e.message}</span>`;
+    $('connStatus').innerHTML = `<span style="color:var(--red)">✗ ${e.message}</span>`;
   }
 }
 
@@ -2571,8 +3112,8 @@ function disconnectAirtable() {
   CONFIG.airtable.apiKey = '';
   CONFIG.airtable.baseId = '';
   CONFIG.useAirtable = false;
-  document.getElementById('atApiKey').value = '';
-  document.getElementById('atBaseId').value = '';
+  $('atApiKey').value = '';
+  $('atBaseId').value = '';
   localStorage.removeItem('maint_settings');
   updateConnStatus();
   toast('Disconnected from Airtable');
@@ -2585,8 +3126,8 @@ function resetDemoData() {
 }
 
 function updateConnStatus() {
-  const dot = document.getElementById('connDot');
-  const label = document.getElementById('connLabel');
+  const dot = $('connDot');
+  const label = $('connLabel');
   if (CONFIG.useAirtable) {
     dot.style.background = 'var(--green)';
     label.textContent = 'Airtable Connected';
@@ -2597,18 +3138,31 @@ function updateConnStatus() {
 }
 
 function exportData() {
-  const data = { machines, workOrders, operators, exported: new Date().toISOString() };
+  const data = { machines, workOrders, operators, activityLog, exported: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'maintenance_data_' + new Date().toISOString().split('T')[0] + '.json';
+  a.download = 'maintenance_data_' + todayISO() + '.json';
   a.click();
 }
 
 // ===================================================================
 // INIT
 // ===================================================================
+// Returns the operator name matching the logged-in tech (matched by name from operators list)
+// In a real deployment this would come from the PIN-to-operator mapping;
+// for now techs select themselves when self-assigning.
+function _currentTechName() {
+  return _loggedInTechName; // set by doLogin() for tech mode, null otherwise
+}
+
 (async function init() {
+  // Detect duplicate machine IDs at startup — flags data quality issues
+  const idCounts = machines.reduce((acc, m) => { acc[m.id] = (acc[m.id]||0)+1; return acc; }, {});
+  Object.entries(idCounts).filter(([,n]) => n > 1).forEach(([id]) =>
+    console.warn(`[MAINT] Duplicate machine ID detected: "${id}" — second entry shadowed. Verify asset registry.`)
+  );
+
   updateConnStatus();
 
   // Load persisted data in demo mode (survives page refresh)
@@ -2632,21 +3186,41 @@ function exportData() {
   }
 
   // Prefill settings fields
-  if (CONFIG.airtable.apiKey) document.getElementById('atApiKey').value = CONFIG.airtable.apiKey;
-  if (CONFIG.airtable.baseId) document.getElementById('atBaseId').value = CONFIG.airtable.baseId;
-  if (CONFIG.airtable.tables.machines) document.getElementById('atMachinesTable').value = CONFIG.airtable.tables.machines;
-  if (CONFIG.airtable.tables.serviceLog) document.getElementById('atServiceTable').value = CONFIG.airtable.tables.serviceLog;
-  if (CONFIG.airtable.tables.operators) document.getElementById('atOperatorsTable').value = CONFIG.airtable.tables.operators;
+  if (CONFIG.airtable.apiKey) $('atApiKey').value = CONFIG.airtable.apiKey;
+  if (CONFIG.airtable.baseId) $('atBaseId').value = CONFIG.airtable.baseId;
+  if (CONFIG.airtable.tables.machines) $('atMachinesTable').value = CONFIG.airtable.tables.machines;
+  if (CONFIG.airtable.tables.serviceLog) $('atServiceTable').value = CONFIG.airtable.tables.serviceLog;
+  if (CONFIG.airtable.tables.operators) $('atOperatorsTable').value = CONFIG.airtable.tables.operators;
 
   // FIX: Debounce search inputs (300ms)
-  const debouncedMachineSearch = debounce(() => renderMachines(), 300);
+  const debouncedMachineSearch = debounce(() => renderMachineGrid(), 300);
   const debouncedWOSearch = debounce(() => renderWorkOrders(), 300);
-  document.getElementById('machineSearch').removeAttribute('oninput');
-  document.getElementById('woSearch').removeAttribute('oninput');
-  document.getElementById('machineSearch').addEventListener('input', debouncedMachineSearch);
-  document.getElementById('woSearch').addEventListener('input', debouncedWOSearch);
+  $('machineSearch').addEventListener('input', debouncedMachineSearch);
+  $('woSearch').addEventListener('input', debouncedWOSearch);
 
-  await refreshDashboard();
+  // Initialize badge count immediately after data loads
+  $('openWoBadge').textContent = workOrders.filter(x => x.status === 'Open' || x.status === 'Pending').length;
+
+  // Bootstrap activity log from existing WO data if empty (cold start)
+  if (activityLog.length === 0 && workOrders.length > 0) {
+    const events = [];
+    for (const w of workOrders) {
+      if (w.reportedDate) events.push({ ts: w.reportedDate + 'T08:00:00Z', type: w._isPM ? 'pm' : 'created', woId: w.id, machineId: w.machineId,
+        text: w._isPM ? `PM auto-generated — overdue` : `${w.incidentType} — ${(w.notes||'').substring(0,55)}${(w.notes||'').length>55?'…':''}`});
+      if (w.workStarted && w.assignedTech) events.push({ ts: w.workStarted + 'T10:00:00Z', type: 'assigned', woId: w.id, machineId: w.machineId,
+        text: `Tech assigned: ${w.assignedTech}`});
+      if (w.workCompleted && w.status === 'Closed') events.push({ ts: w.workCompleted + 'T14:00:00Z', type: 'closed', woId: w.id, machineId: w.machineId,
+        text: `Closed${w.assignedTech ? ' by ' + w.assignedTech : ''}`});
+      if (w.status === 'Pending' && w.followUpDate) events.push({ ts: (w.workStarted || w.reportedDate) + 'T12:00:00Z', type: 'pending', woId: w.id, machineId: w.machineId,
+        text: `Follow-up scheduled ${formatDate(w.followUpDate)}`});
+    }
+    events.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+    activityLog = events.slice(0, 50);
+  }
+
+  // Show login screen — dashboard loads after successful login
+  $('loginScreen').style.display = 'flex';
+  // (refreshDashboard is called by doLogin after mode is set)
 })();
 </script>
 </body>
